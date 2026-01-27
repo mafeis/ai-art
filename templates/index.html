@@ -54,7 +54,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px; /* Space between elements */
+            gap: 20px;
         }
 
         h1, h2 {
@@ -192,6 +192,29 @@
                     <button id="random-all-btn" onclick="randomizeAll()">全随机</button>
                     <button id="random-part-btn" onclick="randomizeParts()">外观随机</button>
                     <button id="random-color-btn" onclick="randomizePalette()">配色随机</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>输出设置</h2>
+                <div class="grid-controls">
+                    <div class="control-group">
+                        <label>分辨率 (大小)</label>
+                        <select id="res-select" onchange="generateImage()">
+                            <option value="32">32px (原图)</option>
+                            <option value="64">64px (2x)</option>
+                            <option value="128" selected>128px (4x)</option>
+                            <option value="256">256px (8x)</option>
+                            <option value="512">512px (16x)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>渲染模式</label>
+                        <select id="mode-select" onchange="generateImage()">
+                            <option value="retro" selected>复古 (Retro)</option>
+                            <option value="hd">高清 (Vector)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -434,6 +457,13 @@
             const img = document.getElementById('preview-img');
             const dlBtn = document.getElementById('download-btn');
             
+            // Get Resolution settings
+            const res = document.getElementById('res-select').value;
+            const mode = document.getElementById('mode-select').value;
+            
+            currentConfig.resolution = res;
+            currentConfig.render_mode = mode;
+
             btn.textContent = '生成中...';
             btn.disabled = true;
 

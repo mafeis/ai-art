@@ -23,6 +23,11 @@
 - **CSS Layout Issues**:
   - `transform: scale()` is purely visual and does not push other elements down, leading to overlap.
   - Solution: Use `width/height` in CSS to physically resize the image while maintaining `image-rendering: pixelated`.
+- **HD Pixel / Resolution Scaling**:
+  - Implemented two rendering modes:
+    - **Retro (Pixel Art)**: Renders at 32x32 then scales up (preserving blocky pixels).
+    - **HD (Vector-like)**: Scales coordinates *before* drawing, resulting in high-resolution, crisp shapes (smaller visual pixels relative to the shape).
+  - Added resolution selection from 32px to 512px.
 
 ## Decisions
 - **Data-Driven Drawing**: Instead of hardcoding "draw_head", "draw_body", the composer now iterates through a layer list and looks up definitions. This makes adding new styles (e.g., "Orc Head", "Wizard Hat") as simple as adding an entry to the dictionary.
@@ -40,3 +45,4 @@
 - Added **Animation Preview (GIF)** and **Spritesheet Download**.
 - Added **Randomization**, **Back Items**, **Weapons**, and **Preview Background Color**.
 - Fixed **Layout Overlap** issues.
+- Added **HD Pixel / Resolution Scaling** controls.

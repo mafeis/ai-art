@@ -37,7 +37,7 @@ class CharacterComposer:
     def get_color(self, key):
         return self.palette.get(key, (255, 0, 255))  # Magenta default for missing
 
-    def draw_part(self, draw, part_name, style, offset_x, offset_y, leg_offset=0):
+    def draw_part(self, draw, part_name, style, offset_x, offset_y, scale=1):
         instructions = defs.PART_DEFINITIONS.get(part_name, {}).get(style, [])
 
         for cmd in instructions:
@@ -47,12 +47,14 @@ class CharacterComposer:
                 # ("rect", (x, y, w, h), color)
                 x, y, w, h = cmd[1]
                 color = self.get_color(cmd[2])
+                # Scale coordinates
+                sx, sy, sw, sh = x * scale, y * scale, w * scale, h * scale
                 draw.rectangle(
                     [
-                        x + offset_x,
-                        y + offset_y,
-                        x + offset_x + w - 1,
-                        y + offset_y + h - 1,
+                        offset_x + sx,
+                        offset_y + sy,
+                        offset_x + sx + sw - 1,
+                        offset_y + sy + sh - 1,
                     ],
                     fill=color,
                 )
@@ -61,36 +63,48 @@ class CharacterComposer:
                 # ("pixel", (x, y), color)
                 x, y = cmd[1]
                 color = self.get_color(cmd[2])
-                draw.point((x + offset_x, y + offset_y), fill=color)
+                sx, sy = x * scale, y * scale
+                # A pixel scaled up is a rect of size scale x scale
+                draw.rectangle(
+                    [
+                        offset_x + sx,
+                        offset_y + sy,
+                        offset_x + sx + scale - 1,
+                        offset_y + sy + scale - 1,
+                    ],
+                    fill=color,
+                )
 
             elif type_ == "polygon":
                 # ("polygon", [(x,y), ...], color)
-                points = [(p[0] + offset_x, p[1] + offset_y) for p in cmd[1]]
+                points = [
+                    (p[0] * scale + offset_x, p[1] * scale + offset_y) for p in cmd[1]
+                ]
                 color = self.get_color(cmd[2])
                 draw.polygon(points, fill=color)
 
-    def compose_frame(self, draw, offset_x, frame_config):
-        bob = frame_config.get("bob", 0)
-        leg_frame = frame_config.get("leg_f", 0)  # -1 left, 0 stand, 1 right, 2 wide
-        arm_frame = frame_config.get("arm_f", 0)  # 0 idle, 1 swing, 2 raised
-        global_x_off = frame_config.get("offset_x", 0)
+    def compose_frame(self, draw, offset_x, frame_config, scale=1):
+        # Frame config values are in base 32px units
+        bob = frame_config.get("bob", 0) * scale
+        leg_frame = frame_config.get("leg_f", 0)
+        arm_frame = frame_config.get("arm_f", 0)
+        global_x_off = frame_config.get("offset_x", 0) * scale
 
-        # Apply global offset for animations like "hurt"
         offset_x += global_x_off
 
-        # Calculate Hand Positions (for Held items)
-        # Base arm pos: x=10, y=17 (Left), x=20, y=17 (Right)
-        # We track the RIGHT hand (front) for the weapon
-        hand_x, hand_y = 20, 17 + bob
+        # Hand Logic (scaled)
+        hand_x_base, hand_y_base = 20, 17
+        hand_x, hand_y = hand_x_base * scale, (hand_y_base * scale) + bob
+
         if arm_frame == 1:
-            hand_x += 2
-            hand_y += 3  # Swing Fwd
+            hand_x += 2 * scale
+            hand_y += 3 * scale
         elif arm_frame == -1:
-            hand_x += 1
-            hand_y += 4  # Swing Back (less likely for right hand in walk?)
+            hand_x += 1 * scale
+            hand_y += 4 * scale
         elif arm_frame == 2:
-            hand_x += 4
-            hand_y -= 2  # Raised
+            hand_x += 4 * scale
+            hand_y -= 2 * scale
 
         for layer in defs.LAYER_ORDER:
             part_key = layer
@@ -101,7 +115,6 @@ class CharacterComposer:
 
             style = self.selections.get(part_key, "none")
 
-            # Default fallbacks
             if style == "none" and part_key in ["head", "body", "legs"]:
                 if part_key == "head":
                     style = "human"
@@ -110,104 +123,135 @@ class CharacterComposer:
                 if part_key == "legs":
                     style = "pants"
 
-            # Back Layer
+            # Helper to scale logic
+            def s(val):
+                return val * scale
+
             if layer == "back":
                 style = self.selections.get("back", "none")
-                self.draw_part(draw, "back", style, offset_x, bob)
+                self.draw_part(draw, "back", style, offset_x, bob, scale)
 
-            # Legs
             elif layer == "legs_back":
-                lx, ly = 12, 24 + bob
+                lx, ly = s(12), s(24) + bob
                 if leg_frame == -1:
-                    lx -= 1
-                    ly -= 1
+                    lx -= s(1)
+                    ly -= s(1)
                 if leg_frame == 1:
-                    lx += 1
+                    lx += s(1)
                 if leg_frame == 2:
-                    lx -= 2
-                    ly += 1
+                    lx -= s(2)
+                    ly += s(1)
                 if leg_frame == -2:
-                    lx -= 2
-                    ly -= 4  # High knee
-                self.draw_part(draw, "legs", style, offset_x + lx, ly)
+                    lx -= s(2)
+                    ly -= s(4)
+                self.draw_part(draw, "legs", style, offset_x + lx, ly, scale)
 
             elif layer == "legs_front":
-                rx, ry = 17, 24 + bob
+                rx, ry = s(17), s(24) + bob
                 if leg_frame == -1:
-                    rx += 1
+                    rx += s(1)
                 if leg_frame == 1:
-                    rx -= 1
-                    ry -= 1
+                    rx -= s(1)
+                    ry -= s(1)
                 if leg_frame == 2:
-                    rx += 2
-                    ry += 1
+                    rx += s(2)
+                    ry += s(1)
                 if leg_frame == -2:
-                    rx += 1
-                    ry -= 1
-                self.draw_part(draw, "legs", style, offset_x + rx, ry)
+                    rx += s(1)
+                    ry -= s(1)
+                self.draw_part(draw, "legs", style, offset_x + rx, ry, scale)
 
-            # Arms
             elif layer == "arms":
                 color = self.get_color("shirt")
-                ay = 17 + bob
+                ay = s(17) + bob
                 if arm_frame == 0:
                     draw.rectangle(
-                        [offset_x + 10, ay, offset_x + 11, ay + 6], fill=color
-                    )  # L
+                        [offset_x + s(10), ay, offset_x + s(11), ay + s(6)], fill=color
+                    )
                     draw.rectangle(
-                        [offset_x + 20, ay, offset_x + 21, ay + 6], fill=color
-                    )  # R
+                        [offset_x + s(20), ay, offset_x + s(21), ay + s(6)], fill=color
+                    )
                 elif arm_frame == 1:
                     draw.rectangle(
-                        [offset_x + 10, ay - 1, offset_x + 11, ay + 5], fill=color
-                    )  # L Back
+                        [offset_x + s(10), ay - s(1), offset_x + s(11), ay + s(5)],
+                        fill=color,
+                    )
                     draw.rectangle(
-                        [offset_x + 20, ay + 1, offset_x + 22, ay + 4], fill=color
-                    )  # R Fwd
+                        [offset_x + s(20), ay + s(1), offset_x + s(22), ay + s(4)],
+                        fill=color,
+                    )
                 elif arm_frame == -1:
                     draw.rectangle(
-                        [offset_x + 10, ay + 1, offset_x + 12, ay + 4], fill=color
-                    )  # L Fwd
+                        [offset_x + s(10), ay + s(1), offset_x + s(12), ay + s(4)],
+                        fill=color,
+                    )
                     draw.rectangle(
-                        [offset_x + 20, ay - 1, offset_x + 21, ay + 5], fill=color
-                    )  # R Back
+                        [offset_x + s(20), ay - s(1), offset_x + s(21), ay + s(5)],
+                        fill=color,
+                    )
                 elif arm_frame == 2:
                     draw.rectangle(
-                        [offset_x + 20, ay - 2, offset_x + 24, ay], fill=color
-                    )  # R Raised
+                        [offset_x + s(20), ay - s(2), offset_x + s(24), ay], fill=color
+                    )
                     draw.rectangle(
-                        [offset_x + 10, ay + 1, offset_x + 11, ay + 6], fill=color
-                    )  # L Idle
+                        [offset_x + s(10), ay + s(1), offset_x + s(11), ay + s(6)],
+                        fill=color,
+                    )
 
-            # Held Items (Weapons)
             elif layer == "held":
                 style = self.selections.get("held", "none")
                 if style != "none":
-                    self.draw_part(draw, "held", style, offset_x + hand_x, hand_y)
+                    self.draw_part(
+                        draw, "held", style, offset_x + hand_x, hand_y, scale
+                    )
 
-            # Core Body Parts
             elif layer in ["body", "head", "eyes", "hair"]:
-                self.draw_part(draw, part_key, style, offset_x, bob)
+                self.draw_part(draw, part_key, style, offset_x, bob, scale)
 
 
 def create_character_spritesheet(
-    filename=None, config_source="character_config.yaml", action="walk"
+    filename=None,
+    config_source="character_config.yaml",
+    action="walk",
+    resolution=128,
+    render_mode="retro",
 ):
+    """
+    render_mode: 'retro' (scale after), 'hd' (scale coords)
+    """
     composer = CharacterComposer(config_source)
     anim_def = defs.ANIMATION_DEFINITIONS.get(
         action, defs.ANIMATION_DEFINITIONS["walk"]
     )
     frames = len(anim_def)
 
-    sheet_w = composer.width * frames
-    sheet_h = composer.height
+    # Base dimensions
+    base_w, base_h = composer.width, composer.height  # 32x32
+
+    scale_factor = 1
+    if render_mode == "hd":
+        scale_factor = max(1, resolution // base_h)
+        draw_w, draw_h = base_w * scale_factor, base_h * scale_factor
+    else:
+        draw_w, draw_h = base_w, base_h
+
+    sheet_w = draw_w * frames
+    sheet_h = draw_h
 
     img = Image.new("RGBA", (sheet_w, sheet_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
     for f in range(frames):
         config = anim_def[f]
-        composer.compose_frame(draw, f * composer.width, config)
+        composer.compose_frame(draw, f * draw_w, config, scale=scale_factor)
+
+    # Post-process resize for Retro mode
+    if render_mode == "retro" and resolution != base_h:
+        # Scale whole sheet
+        target_scale = resolution / base_h
+        new_w = int(sheet_w * target_scale)
+        new_h = int(sheet_h * target_scale)
+        img = img.resize((new_w, new_h), Image.NEAREST)
 
     if filename:
         img.save(filename)
@@ -215,17 +259,38 @@ def create_character_spritesheet(
     return img
 
 
-def create_character_gif(config_source="character_config.yaml", action="walk"):
+def create_character_gif(
+    config_source="character_config.yaml",
+    action="walk",
+    resolution=128,
+    render_mode="retro",
+):
     composer = CharacterComposer(config_source)
     anim_def = defs.ANIMATION_DEFINITIONS.get(
         action, defs.ANIMATION_DEFINITIONS["walk"]
     )
 
+    base_w, base_h = composer.width, composer.height
+
+    scale_factor = 1
+    if render_mode == "hd":
+        scale_factor = max(1, resolution // base_h)
+        draw_w, draw_h = base_w * scale_factor, base_h * scale_factor
+    else:
+        draw_w, draw_h = base_w, base_h
+
     frames = []
     for f_config in anim_def:
-        frame_img = Image.new("RGBA", (composer.width, composer.height), (0, 0, 0, 0))
+        frame_img = Image.new("RGBA", (draw_w, draw_h), (0, 0, 0, 0))
         draw = ImageDraw.Draw(frame_img)
-        composer.compose_frame(draw, 0, f_config)
+        composer.compose_frame(draw, 0, f_config, scale=scale_factor)
+
+        if render_mode == "retro" and resolution != base_h:
+            target_scale = resolution / base_h
+            new_w = int(draw_w * target_scale)
+            new_h = int(draw_h * target_scale)
+            frame_img = frame_img.resize((new_w, new_h), Image.NEAREST)
+
         frames.append(frame_img)
 
     buf = io.BytesIO()
@@ -244,4 +309,5 @@ def create_character_gif(config_source="character_config.yaml", action="walk"):
 
 
 if __name__ == "__main__":
-    create_character_spritesheet("character_sheet.png")
+    # Test
+    create_character_spritesheet("test_hd.png", resolution=128, render_mode="hd")
