@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>像素角色生成器 (至尊版)</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #f0f0f0;
+            --accent: #4a9eff;
+            --border: #444;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .editor-panel {
+            flex: 2;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            min-width: 300px;
+        }
+
+        .preview-panel {
+            flex: 1;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            min-width: 300px;
+            position: sticky;
+            top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px; /* Space between elements */
+        }
+
+        h1, h2 {
+            margin-top: 0;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.1);
+            padding: 15px;
+            border-radius: 6px;
+        }
+        
+        .section h2 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: #ccc;
+            border: none;
+        }
+
+        .grid-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        select, input[type="number"] {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border);
+            padding: 5px;
+            border-radius: 4px;
+            width: 120px;
+        }
+
+        input[type="color"] {
+            background: none;
+            border: none;
+            width: 50px;
+            height: 30px;
+            cursor: pointer;
+        }
+
+        #preview-img {
+            /* Fix overlap by using real dimensions instead of transform */
+            width: 128px;
+            height: 128px;
+            
+            border: 2px dashed var(--border);
+            padding: 10px;
+            background-color: #333; /* Default bg */
+            image-rendering: pixelated;
+            
+            /* Box shadow for nice look */
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transition: background-color 0.3s;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            color: white;
+            min-width: 100px;
+        }
+
+        #generate-btn { background: var(--accent); }
+        #random-color-btn { background: #e67e22; }
+        #random-part-btn { background: #9b59b6; }
+        #random-all-btn { background: #e74c3c; }
+        
+        #download-btn {
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border-radius: 4px;
+            width: 100%;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+
+        button:hover, #download-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .bg-picker {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 编辑面板 -->
+        <div class="editor-panel">
+            <h1>角色工厂</h1>
+            
+            <div class="section">
+                <h2>快捷操作</h2>
+                <div class="btn-group">
+                    <button id="random-all-btn" onclick="randomizeAll()">全随机</button>
+                    <button id="random-part-btn" onclick="randomizeParts()">外观随机</button>
+                    <button id="random-color-btn" onclick="randomizePalette()">配色随机</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>动作设置</h2>
+                <div class="grid-controls">
+                    <div class="control-group">
+                        <label>动作类型</label>
+                        <select id="action-select" onchange="updateAction()">
+                            <!-- 动态加载 -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="parts-controls" class="section">
+                <h2>外观部件</h2>
+                <div class="grid-controls" id="parts-grid">
+                    <!-- 动态加载 -->
+                </div>
+            </div>
+
+            <div id="palette-controls" class="section">
+                <h2>配色方案</h2>
+                <div class="grid-controls" id="palette-grid">
+                    <!-- 动态加载 -->
+                </div>
+            </div>
+            
+            <button id="generate-btn" onclick="generateImage()">刷新预览</button>
+        </div>
+
+        <!-- 预览面板 (固定) -->
+        <div class="preview-panel">
+            <h1>实时演示</h1>
+            <img id="preview-img" alt="角色预览" />
+            
+            <div class="control-group bg-picker">
+                <label>背景颜色</label>
+                <input type="color" value="#333333" oninput="document.getElementById('preview-img').style.backgroundColor = this.value">
+            </div>
+
+            <div class="btn-group">
+                <a id="download-btn" href="#" download="character.png">下载序列帧</a>
+            </div>
+            
+            <p style="font-size: 0.8rem; color: #888; text-align: center;">
+                当前显示为 GIF 动画预览。<br>
+                点击“下载序列帧”保存 PNG 拼图。
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let currentConfig = { parts: {}, palette: {}, action: "walk" };
+        let partOptions = {};
+
+        // 汉化映射
+        const labelMap = {
+            "head": "头部", "hair": "发型", "eyes": "眼睛", 
+            "body": "上身", "legs": "下装", "skin": "肤色",
+            "hair": "发色", "shirt": "上装色", "pants": "下装色",
+            "boots": "鞋色", "eye_color": "瞳色", "metal": "金属色",
+            "highlight": "高光", "outline": "轮廓", "white": "白色",
+            "black": "黑色", "tooth": "牙齿/骨骼", "wood": "木质",
+            "back": "背部装饰", "held": "手持物品"
+        };
+        
+        const styleMap = {
+            "none": "无",
+            "human": "人类", "elf": "精灵", "orc": "兽人", "dwarf": "矮人", "skeleton": "骷髅", "robot": "机器人", "pumpkin": "南瓜头",
+            "bald": "光头", "short": "短发", "long": "长发", "mohawk": "莫霍克", "ponytail": "马尾", "afro": "爆炸头", "wizard_hat": "巫师帽", "hood": "兜帽", "bandana": "头巾",
+            "normal": "普通", "sunglasses": "墨镜", "cyclops": "独眼", "visipatch": "战术目镜", "glowing": "发光", "tired": "疲惫",
+            "shirt": "衬衫", "armor": "重甲", "robe": "法袍", "jacket": "夹克", "ribs": "肋骨", "suit": "西装", "overalls": "背带裤",
+            "pants": "长裤", "skirt": "裙子", "shorts": "短裤", "peg_leg": "木腿", "boots_high": "长筒靴",
+            "cape": "披风", "wings": "翅膀", "backpack": "背包", "jetpack": "喷气背包",
+            "sword": "剑", "staff": "法杖", "axe": "斧头", "shield": "盾牌",
+            "idle": "待机 (Idle)", "walk": "行走 (Walk)", "attack": "攻击 (Attack)", "jump": "跳跃 (Jump)", 
+            "run": "奔跑 (Run)", "hurt": "受击 (Hurt)", "die": "死亡 (Die)", "cheer": "欢呼 (Cheer)"
+        };
+
+        function hexToRgb(hex) {
+            const r = parseInt(hex.substr(1, 2), 16);
+            const g = parseInt(hex.substr(3, 2), 16);
+            const b = parseInt(hex.substr(5, 2), 16);
+            return [r, g, b];
+        }
+
+        function rgbToHex(rgb) {
+            return "#" + rgb.map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? "0" + hex : hex;
+            }).join('');
+        }
+
+        // 随机颜色生成
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        async function init() {
+            try {
+                const optRes = await fetch('/options');
+                partOptions = await optRes.json();
+                
+                const cfgRes = await fetch('/config');
+                const loadedConfig = await cfgRes.json();
+                
+                currentConfig.palette = loadedConfig.palette || {};
+                currentConfig.parts = loadedConfig.parts || {};
+                
+                renderControls();
+                generateImage();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function randomizeParts() {
+            for (const part of Object.keys(currentConfig.parts)) {
+                if (partOptions[part]) {
+                    const styles = partOptions[part];
+                    const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+                    currentConfig.parts[part] = randomStyle;
+                }
+            }
+            // 刷新UI
+            renderControls();
+            generateImage();
+        }
+
+        function randomizePalette() {
+            for (const key of Object.keys(currentConfig.palette)) {
+                // Keep outline dark usually, but let's random all for fun, maybe tweak logic later
+                currentConfig.palette[key] = hexToRgb(getRandomColor());
+            }
+            renderControls();
+            generateImage();
+        }
+
+        function randomizeAll() {
+            for (const part of Object.keys(currentConfig.parts)) {
+                if (partOptions[part]) {
+                    const styles = partOptions[part];
+                    currentConfig.parts[part] = styles[Math.floor(Math.random() * styles.length)];
+                }
+            }
+            for (const key of Object.keys(currentConfig.palette)) {
+                currentConfig.palette[key] = hexToRgb(getRandomColor());
+            }
+            renderControls();
+            generateImage();
+        }
+
+        function renderControls() {
+            // Action
+            const actionSelect = document.getElementById('action-select');
+            actionSelect.innerHTML = '';
+            if(partOptions.animations) {
+                partOptions.animations.forEach(anim => {
+                    const opt = document.createElement('option');
+                    opt.value = anim;
+                    opt.textContent = styleMap[anim] || anim;
+                    actionSelect.appendChild(opt);
+                });
+                actionSelect.value = currentConfig.action || "walk";
+            }
+
+            // Parts
+            const partsGrid = document.getElementById('parts-grid');
+            partsGrid.innerHTML = '';
+            for (const [part, styles] of Object.entries(partOptions)) {
+                if(part === 'animations') continue;
+                
+                const div = document.createElement('div');
+                div.className = 'control-group';
+                
+                const label = document.createElement('label');
+                label.textContent = labelMap[part] || part;
+                
+                const select = document.createElement('select');
+                styles.forEach(style => {
+                    const option = document.createElement('option');
+                    option.value = style;
+                    option.textContent = styleMap[style] || style;
+                    select.appendChild(option);
+                });
+                
+                // Set value from config (initially from YAML, then from memory)
+                // If config doesn't have this part key yet (newly added parts), default to first
+                if (!currentConfig.parts[part]) currentConfig.parts[part] = styles[0];
+                select.value = currentConfig.parts[part];
+                
+                select.addEventListener('change', (e) => {
+                    currentConfig.parts[part] = e.target.value;
+                    generateImage();
+                });
+
+                div.appendChild(label);
+                div.appendChild(select);
+                partsGrid.appendChild(div);
+            }
+
+            // Palette
+            const paletteGrid = document.getElementById('palette-grid');
+            paletteGrid.innerHTML = '';
+            for (const [key, value] of Object.entries(currentConfig.palette)) {
+                const div = document.createElement('div');
+                div.className = 'control-group';
+                
+                const label = document.createElement('label');
+                label.textContent = labelMap[key] || key;
+                
+                const input = document.createElement('input');
+                input.type = 'color';
+                input.value = rgbToHex(value);
+                input.addEventListener('change', (e) => {
+                    currentConfig.palette[key] = hexToRgb(e.target.value);
+                    generateImage();
+                });
+
+                div.appendChild(label);
+                div.appendChild(input);
+                paletteGrid.appendChild(div);
+            }
+        }
+
+        function updateAction() {
+            currentConfig.action = document.getElementById('action-select').value;
+            generateImage();
+        }
+
+        async function generateImage() {
+            const btn = document.getElementById('generate-btn');
+            const img = document.getElementById('preview-img');
+            const dlBtn = document.getElementById('download-btn');
+            
+            btn.textContent = '生成中...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentConfig)
+                });
+
+                const data = await response.json();
+                if (data.image) {
+                    img.src = data.image; 
+                    dlBtn.href = data.download_data; 
+                    dlBtn.download = data.filename;
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                btn.textContent = '刷新预览';
+                btn.disabled = false;
+            }
+        }
+
+        // init(); // Removed strict init to ensure functions are defined first
+        window.onload = init;
+    </script>
+</body>
+</html>
