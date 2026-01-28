@@ -104,7 +104,7 @@
             border: 1px solid var(--border);
             padding: 5px;
             border-radius: 4px;
-            width: 120px;
+            width: 140px;
         }
 
         input[type="color"] {
@@ -116,16 +116,12 @@
         }
 
         #preview-img {
-            /* Fix overlap by using real dimensions instead of transform */
-            width: 128px;
-            height: 128px;
-            
+            width: 256px;
+            height: 256px;
             border: 2px dashed var(--border);
             padding: 10px;
-            background-color: #333; /* Default bg */
+            background-color: #333; 
             image-rendering: pixelated;
-            
-            /* Box shadow for nice look */
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             transition: background-color 0.3s;
         }
@@ -178,6 +174,14 @@
         .bg-picker {
             width: 100%;
         }
+        
+        .badge {
+            background: #444;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -187,7 +191,21 @@
             <h1>角色工厂</h1>
             
             <div class="section">
-                <h2>快捷操作</h2>
+                <h2>快捷操作 <span style="font-size:0.8rem;color:#888;">(智能匹配风格)</span></h2>
+                <div class="grid-controls">
+                    <div class="control-group">
+                        <label>主题限定 (Theme)</label>
+                        <select id="theme-select">
+                            <option value="all" selected>全部 (混合/随机)</option>
+                            <option value="xianxia">仙侠 (Xianxia)</option>
+                            <option value="tech">科技 (Tech)</option>
+                            <option value="western">魔幻 (Western)</option>
+                            <option value="cyberpunk">赛博朋克 (Cyberpunk)</option>
+                            <option value="steampunk">蒸汽朋克 (Steampunk)</option>
+                            <option value="horror">恐怖 (Horror)</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="btn-group">
                     <button id="random-all-btn" onclick="randomizeAll()">全随机</button>
                     <button id="random-part-btn" onclick="randomizeParts()">外观随机</button>
@@ -196,26 +214,32 @@
             </div>
 
             <div class="section">
-                <h2>输出设置</h2>
+                <h2>画质风格 (Render Mode)</h2>
                 <div class="grid-controls">
                     <div class="control-group">
-                        <label>分辨率 (大小)</label>
-                        <select id="res-select" onchange="generateImage()">
-                            <option value="32">32px (原图)</option>
-                            <option value="64">64px (2x)</option>
-                            <option value="128" selected>128px (4x)</option>
-                            <option value="256">256px (8x)</option>
-                            <option value="512">512px (16x)</option>
+                        <label>精细度</label>
+                        <select id="density-select" onchange="generateImage()">
+                            <option value="0.5">8-bit (粗糙/怀旧)</option>
+                            <option value="1.0">16-bit (标准/复古)</option>
+                            <option value="2.0">32-bit (精致)</option>
+                            <option value="4.0" selected>64-bit (高清/圆润)</option>
+                            <option value="8.0">128-bit (矢量/超清)</option>
                         </select>
                     </div>
                     <div class="control-group">
-                        <label>渲染模式</label>
-                        <select id="mode-select" onchange="generateImage()">
-                            <option value="retro" selected>复古 (Retro)</option>
-                            <option value="hd">高清 (Vector)</option>
+                        <label>渲染风格</label>
+                        <select id="render-mode-select" onchange="generateImage()">
+                            <option value="retro">标准 (Standard)</option>
+                            <option value="hd">矢量 (HD Vector)</option>
+                            <option value="sketch">手绘/草图 (Sketch)</option>
+                            <option value="neon">赛博/发光 (Neon)</option>
+                            <option value="ink">水墨/写意 (Ink)</option>
                         </select>
                     </div>
                 </div>
+                <p style="font-size: 0.8rem; color: #666; margin-top:5px;">
+                    <strong style="color:var(--accent)">Neon</strong> 增加发光特效；<strong style="color:var(--accent)">Ink</strong> 模拟水墨晕染。
+                </p>
             </div>
 
             <div class="section">
@@ -250,6 +274,7 @@
         <!-- 预览面板 (固定) -->
         <div class="preview-panel">
             <h1>实时演示</h1>
+            <div id="status-bar" style="width:100%; text-align:center; font-size:0.8rem; margin-bottom:10px; color:#aaa; min-height: 1.2em;"></div>
             <img id="preview-img" alt="角色预览" />
             
             <div class="control-group bg-picker">
@@ -258,21 +283,19 @@
             </div>
 
             <div class="btn-group">
-                <a id="download-btn" href="#" download="character.png">下载序列帧</a>
+                <a id="download-btn" href="#" download="character.png">下载序列帧 (PNG)</a>
             </div>
             
             <p style="font-size: 0.8rem; color: #888; text-align: center;">
-                当前显示为 GIF 动画预览。<br>
-                点击“下载序列帧”保存 PNG 拼图。
+                无论选择何种风格，下载的图片均为高清大图 (512px)。
             </p>
         </div>
     </div>
 
     <script>
-        let currentConfig = { parts: {}, palette: {}, action: "walk" };
+        let currentConfig = { parts: {}, palette: {}, action: "walk", render_mode: "retro" };
         let partOptions = {};
 
-        // 汉化映射
         const labelMap = {
             "head": "头部", "hair": "发型", "eyes": "眼睛", 
             "body": "上身", "legs": "下装", "skin": "肤色",
@@ -280,18 +303,25 @@
             "boots": "鞋色", "eye_color": "瞳色", "metal": "金属色",
             "highlight": "高光", "outline": "轮廓", "white": "白色",
             "black": "黑色", "tooth": "牙齿/骨骼", "wood": "木质",
-            "back": "背部装饰", "held": "手持物品"
+            "back": "背部装饰", "held": "手持物品",
+            "neon_green": "霓虹绿", "neon_pink": "霓虹粉", "neon_blue": "霓虹蓝",
+            "brass": "黄铜", "leather": "皮革", "blood": "血红", "zombie_skin": "僵尸肤色",
+            "jade": "玉石", "gold": "黄金"
         };
         
         const styleMap = {
             "none": "无",
             "human": "人类", "elf": "精灵", "orc": "兽人", "dwarf": "矮人", "skeleton": "骷髅", "robot": "机器人", "pumpkin": "南瓜头",
+            "sage_beard": "长须老者", "cyborg_eye": "生化眼", "zombie": "僵尸", "gas_mask": "防毒面具", "oni": "鬼面",
             "bald": "光头", "short": "短发", "long": "长发", "mohawk": "莫霍克", "ponytail": "马尾", "afro": "爆炸头", "wizard_hat": "巫师帽", "hood": "兜帽", "bandana": "头巾",
-            "normal": "普通", "sunglasses": "墨镜", "cyclops": "独眼", "visipatch": "战术目镜", "glowing": "发光", "tired": "疲惫",
+            "topknot": "道士发髻", "long_flowy": "飘逸长发", "helmet": "头盔", "mohawk_neon": "霓虹莫霍克", "top_hat": "高顶礼帽", "brain_exposed": "大脑外露",
+            "normal": "普通", "sunglasses": "墨镜", "cyclops": "独眼", "visipatch": "战术目镜", "glowing": "发光", "tired": "疲惫", "goggles": "护目镜",
             "shirt": "衬衫", "armor": "重甲", "robe": "法袍", "jacket": "夹克", "ribs": "肋骨", "suit": "西装", "overalls": "背带裤",
-            "pants": "长裤", "skirt": "裙子", "shorts": "短裤", "peg_leg": "木腿", "boots_high": "长筒靴",
-            "cape": "披风", "wings": "翅膀", "backpack": "背包", "jetpack": "喷气背包",
+            "hanfu_scholar": "汉服(文)", "hanfu_warrior": "汉服(武)", "mech_suit": "机甲", "jacket_neon": "赛博夹克", "coat_brass": "黄铜大衣", "ribs_gore": "血腥肋骨",
+            "pants": "长裤", "skirt": "裙子", "shorts": "短裤", "peg_leg": "木腿", "boots_high": "长筒靴", "robot_legs": "机械腿",
+            "cape": "披风", "wings": "翅膀", "backpack": "背包", "jetpack": "喷气背包", "flying_swords": "御剑", "coffin": "棺材",
             "sword": "剑", "staff": "法杖", "axe": "斧头", "shield": "盾牌",
+            "jian": "宝剑", "fan": "折扇", "gourd": "酒葫芦", "laser_gun": "激光枪", "katana_laser": "光刃武士刀", "wrench": "扳手", "chainsaw": "电锯", "butcher_knife": "屠刀",
             "idle": "待机 (Idle)", "walk": "行走 (Walk)", "attack": "攻击 (Attack)", "jump": "跳跃 (Jump)", 
             "run": "奔跑 (Run)", "hurt": "受击 (Hurt)", "die": "死亡 (Die)", "cheer": "欢呼 (Cheer)"
         };
@@ -310,20 +340,11 @@
             }).join('');
         }
 
-        // 随机颜色生成
-        function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
-
         async function init() {
             try {
                 const optRes = await fetch('/options');
-                partOptions = await optRes.json();
+                const data = await optRes.json();
+                partOptions = data;
                 
                 const cfgRes = await fetch('/config');
                 const loadedConfig = await cfgRes.json();
@@ -338,40 +359,38 @@
             }
         }
 
-        function randomizeParts() {
-            for (const part of Object.keys(currentConfig.parts)) {
-                if (partOptions[part]) {
-                    const styles = partOptions[part];
-                    const randomStyle = styles[Math.floor(Math.random() * styles.length)];
-                    currentConfig.parts[part] = randomStyle;
+        async function callRandomize() {
+            const theme = document.getElementById('theme-select').value;
+            try {
+                const res = await fetch(`/randomize?theme=${theme}`);
+                const data = await res.json();
+                currentConfig.parts = data.parts;
+                currentConfig.palette = data.palette;
+                
+                // Auto-apply recommended render mode if provided
+                if (data.render_mode) {
+                    currentConfig.render_mode = data.render_mode;
+                    document.getElementById('render-mode-select').value = data.render_mode;
                 }
+                
+                renderControls();
+                generateImage();
+            } catch(e) {
+                console.error(e);
             }
-            // 刷新UI
-            renderControls();
-            generateImage();
+        }
+
+        function randomizeParts() {
+            // Keep palette, random parts
+            callRandomize(); 
         }
 
         function randomizePalette() {
-            for (const key of Object.keys(currentConfig.palette)) {
-                // Keep outline dark usually, but let's random all for fun, maybe tweak logic later
-                currentConfig.palette[key] = hexToRgb(getRandomColor());
-            }
-            renderControls();
-            generateImage();
+            callRandomize(); 
         }
 
         function randomizeAll() {
-            for (const part of Object.keys(currentConfig.parts)) {
-                if (partOptions[part]) {
-                    const styles = partOptions[part];
-                    currentConfig.parts[part] = styles[Math.floor(Math.random() * styles.length)];
-                }
-            }
-            for (const key of Object.keys(currentConfig.palette)) {
-                currentConfig.palette[key] = hexToRgb(getRandomColor());
-            }
-            renderControls();
-            generateImage();
+            callRandomize();
         }
 
         function renderControls() {
@@ -392,7 +411,7 @@
             const partsGrid = document.getElementById('parts-grid');
             partsGrid.innerHTML = '';
             for (const [part, styles] of Object.entries(partOptions)) {
-                if(part === 'animations') continue;
+                if(part === 'animations' || part === 'themes') continue;
                 
                 const div = document.createElement('div');
                 div.className = 'control-group';
@@ -401,6 +420,7 @@
                 label.textContent = labelMap[part] || part;
                 
                 const select = document.createElement('select');
+                
                 styles.forEach(style => {
                     const option = document.createElement('option');
                     option.value = style;
@@ -408,8 +428,6 @@
                     select.appendChild(option);
                 });
                 
-                // Set value from config (initially from YAML, then from memory)
-                // If config doesn't have this part key yet (newly added parts), default to first
                 if (!currentConfig.parts[part]) currentConfig.parts[part] = styles[0];
                 select.value = currentConfig.parts[part];
                 
@@ -456,16 +474,17 @@
             const btn = document.getElementById('generate-btn');
             const img = document.getElementById('preview-img');
             const dlBtn = document.getElementById('download-btn');
+            const statusBar = document.getElementById('status-bar');
             
-            // Get Resolution settings
-            const res = document.getElementById('res-select').value;
-            const mode = document.getElementById('mode-select').value;
+            const density = document.getElementById('density-select').value;
+            const mode = document.getElementById('render-mode-select').value;
             
-            currentConfig.resolution = res;
+            currentConfig.density = density;
             currentConfig.render_mode = mode;
 
             btn.textContent = '生成中...';
             btn.disabled = true;
+            statusBar.innerHTML = '<span style="color: #4a9eff;">⚡ 正在生成像素... (耗时取决于精度)</span>';
 
             try {
                 const response = await fetch('/generate', {
@@ -475,20 +494,29 @@
                 });
 
                 const data = await response.json();
-                if (data.image) {
+                
+                if (response.ok && data.image) {
                     img.src = data.image; 
                     dlBtn.href = data.download_data; 
                     dlBtn.download = data.filename;
+                    
+                    if (data.stats) {
+                        statusBar.innerHTML = `<span style="color: #28a745;">✅ 完成!</span> <span style="color: #888;">耗时: ${data.stats.duration}s | 大小: ${data.stats.size_kb}KB | 尺寸: ${data.stats.width}x${data.stats.height}</span>`;
+                    } else {
+                        statusBar.innerHTML = '<span style="color: #28a745;">✅ 生成成功</span>';
+                    }
+                } else {
+                    statusBar.innerHTML = `<span style="color: #e74c3c;">❌ 错误: ${data.error || '未知错误'}</span>`;
                 }
             } catch (e) {
                 console.error(e);
+                statusBar.innerHTML = `<span style="color: #e74c3c;">❌ 网络错误: ${e.message}</span>`;
             } finally {
                 btn.textContent = '刷新预览';
                 btn.disabled = false;
             }
         }
 
-        // init(); // Removed strict init to ensure functions are defined first
         window.onload = init;
     </script>
 </body>

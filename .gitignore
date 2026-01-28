@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.sisyphus/
+.ruff_cache/
+bak/
+unused_scripts/
+*.png
+!scene_bg.png

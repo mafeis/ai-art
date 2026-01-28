@@ -3,12 +3,17 @@ canvas:
   width: 32
   height: 32
 
+# 角色外观部件选择（使用样式名称，不是坐标）
 parts:
-  head: [10, 4, 22, 16]   # x1, y1, x2, y2
-  body: [12, 16, 20, 24]
-  leg_left: [12, 24, 15, 30]
-  leg_right: [17, 24, 20, 30]
+  head: human
+  hair: short
+  eyes: normal
+  body: shirt
+  legs: pants
+  back: none
+  held: none
 
+# 配色方案
 palette:
   skin: [255, 200, 150]
   hair: [100, 50, 0]
@@ -16,14 +21,4 @@ palette:
   pants: [50, 50, 50]
   boots: [100, 50, 0]
   outline: [20, 20, 20]
-
-animations:
-  idle:
-    - {bob: 0, legs: "stand"}
-    - {bob: 1, legs: "stand"}
-  
-  walk:
-    - {bob: 0, legs: "stand"}
-    - {bob: 1, legs: "left_fwd"}
-    - {bob: 0, legs: "stand"}
-    - {bob: 1, legs: "right_fwd"}
+  eye_color: [50, 50, 50]

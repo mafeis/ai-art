@@ -2,89 +2,172 @@ from PIL import Image, ImageDraw
 import yaml
 import sys
 import character_definitions as defs
+import post_effects  # 艺术滤镜系统
 import io
+import random
 
 
 class CharacterComposer:
-    """
-    Composes a character from modular parts defined in character_definitions.py.
-    """
-
     def __init__(self, config_source="character_config.yaml"):
-        # Load config
         if isinstance(config_source, dict):
             config = config_source
         else:
             try:
-                with open(config_source, "r") as f:
+                with open(config_source, "r", encoding="utf-8") as f:
                     config = yaml.safe_load(f)
             except (FileNotFoundError, yaml.YAMLError) as e:
                 print(f"Error loading config: {e}")
-                config = {}  # Fallback to empty
+                config = {}
 
         self.width = config.get("canvas", {}).get("width", 32)
         self.height = config.get("canvas", {}).get("height", 32)
-
-        # Load selections (which style to use for each part)
         self.selections = config.get("parts", {})
-
-        # Load Palette
         self.palette = defs.DEFAULT_PALETTE.copy()
         user_palette = config.get("palette", {})
         for k, v in user_palette.items():
             self.palette[k] = tuple(v) if isinstance(v, (list, tuple)) else v
 
     def get_color(self, key):
-        return self.palette.get(key, (255, 0, 255))  # Magenta default for missing
+        return self.palette.get(key, (255, 0, 255))
 
-    def draw_part(self, draw, part_name, style, offset_x, offset_y, scale=1):
+    def adjust_color(self, color, factor):
+        r, g, b = color
+        r = min(255, int(r * factor))
+        g = min(255, int(g * factor))
+        b = min(255, int(b * factor))
+        return (r, g, b)
+
+    def draw_part(
+        self, draw, part_name, style, offset_x, offset_y, scale=1.0, render_mode="retro"
+    ):
         instructions = defs.PART_DEFINITIONS.get(part_name, {}).get(style, [])
+
+        is_hd = (render_mode == "hd") and (scale >= 4.0)
+        is_sketch = render_mode == "sketch"
 
         for cmd in instructions:
             type_ = cmd[0]
 
             if type_ == "rect":
-                # ("rect", (x, y, w, h), color)
                 x, y, w, h = cmd[1]
-                color = self.get_color(cmd[2])
-                # Scale coordinates
-                sx, sy, sw, sh = x * scale, y * scale, w * scale, h * scale
-                draw.rectangle(
-                    [
-                        offset_x + sx,
-                        offset_y + sy,
-                        offset_x + sx + sw - 1,
-                        offset_y + sy + sh - 1,
-                    ],
-                    fill=color,
-                )
+                base_color = self.get_color(cmd[2])
+
+                sx, sy = x * scale, y * scale
+                sw, sh = w * scale, h * scale
+                x1, y1 = offset_x + sx, offset_y + sy
+
+                if is_sketch:
+                    # Sketch Logic: Jitter and messy lines
+                    jitter = scale * 0.1
+                    x1 += random.uniform(-jitter, jitter)
+                    y1 += random.uniform(-jitter, jitter)
+                    # Draw multiple lines to simulate stroke? Or just a slightly rotated/offset rect
+                    # Simple approach: Draw outline slightly offset from fill
+
+                    # Fill
+                    draw.rectangle([x1, y1, x1 + sw, y1 + sh], fill=base_color)
+
+                    # Outline (Wobbly)
+                    outline_color = self.adjust_color(base_color, 0.5)
+                    outline_width = int(max(1, scale * 0.1))
+                    draw.rectangle(
+                        [
+                            x1 + random.uniform(-1, 1),
+                            y1 + random.uniform(-1, 1),
+                            x1 + sw + random.uniform(-1, 1),
+                            y1 + sh + random.uniform(-1, 1),
+                        ],
+                        outline=outline_color,
+                        width=outline_width,
+                    )
+
+                elif is_hd:
+                    # HD Render
+                    outline_width = max(1, scale * 0.15)
+                    outline_color = self.adjust_color(base_color, 0.6)
+                    radius = min(sw, sh) * 0.3
+                    draw.rounded_rectangle(
+                        [x1, y1, x1 + sw, y1 + sh],
+                        radius=radius,
+                        fill=base_color,
+                        outline=outline_color,
+                        width=int(outline_width),
+                    )
+                    light_color = self.adjust_color(base_color, 1.2)
+                    inset = scale * 0.2
+                    if sh > inset * 2:
+                        draw.rounded_rectangle(
+                            [x1 + inset, y1 + inset, x1 + sw - inset, y1 + sh * 0.5],
+                            radius=radius * 0.8,
+                            fill=light_color,
+                        )
+                    highlight_size = min(sw, sh) * 0.25
+                    draw.ellipse(
+                        [
+                            x1 + sw * 0.1,
+                            y1 + sh * 0.1,
+                            x1 + sw * 0.1 + highlight_size,
+                            y1 + sh * 0.1 + highlight_size,
+                        ],
+                        fill=(255, 255, 255, 128),
+                    )
+                else:
+                    # Retro
+                    draw.rectangle([x1, y1, x1 + sw, y1 + sh], fill=base_color)
 
             elif type_ == "pixel":
-                # ("pixel", (x, y), color)
                 x, y = cmd[1]
-                color = self.get_color(cmd[2])
+                base_color = self.get_color(cmd[2])
                 sx, sy = x * scale, y * scale
-                # A pixel scaled up is a rect of size scale x scale
-                draw.rectangle(
-                    [
-                        offset_x + sx,
-                        offset_y + sy,
-                        offset_x + sx + scale - 1,
-                        offset_y + sy + scale - 1,
-                    ],
-                    fill=color,
-                )
+
+                if is_sketch:
+                    draw.rectangle(
+                        [
+                            offset_x + sx,
+                            offset_y + sy,
+                            offset_x + sx + scale,
+                            offset_y + sy + scale,
+                        ],
+                        fill=base_color,
+                    )
+                elif is_hd:
+                    radius = scale * 0.4
+                    draw.rounded_rectangle(
+                        [
+                            offset_x + sx,
+                            offset_y + sy,
+                            offset_x + sx + scale,
+                            offset_y + sy + scale,
+                        ],
+                        radius=radius,
+                        fill=base_color,
+                    )
+                else:
+                    draw.rectangle(
+                        [
+                            offset_x + sx,
+                            offset_y + sy,
+                            offset_x + sx + scale,
+                            offset_y + sy + scale,
+                        ],
+                        fill=base_color,
+                    )
 
             elif type_ == "polygon":
-                # ("polygon", [(x,y), ...], color)
                 points = [
                     (p[0] * scale + offset_x, p[1] * scale + offset_y) for p in cmd[1]
                 ]
-                color = self.get_color(cmd[2])
-                draw.polygon(points, fill=color)
+                base_color = self.get_color(cmd[2])
 
-    def compose_frame(self, draw, offset_x, frame_config, scale=1):
-        # Frame config values are in base 32px units
+                if is_hd:
+                    outline_color = self.adjust_color(base_color, 0.6)
+                    draw.polygon(points, fill=base_color, outline=outline_color)
+                else:
+                    draw.polygon(points, fill=base_color)
+
+    def compose_frame(
+        self, draw, offset_x, frame_config, scale=1.0, render_mode="retro"
+    ):
         bob = frame_config.get("bob", 0) * scale
         leg_frame = frame_config.get("leg_f", 0)
         arm_frame = frame_config.get("arm_f", 0)
@@ -92,19 +175,21 @@ class CharacterComposer:
 
         offset_x += global_x_off
 
-        # Hand Logic (scaled)
+        def s(val):
+            return val * scale
+
         hand_x_base, hand_y_base = 20, 17
-        hand_x, hand_y = hand_x_base * scale, (hand_y_base * scale) + bob
+        hand_x, hand_y = s(hand_x_base), s(hand_y_base) + bob
 
         if arm_frame == 1:
-            hand_x += 2 * scale
-            hand_y += 3 * scale
+            hand_x += s(2)
+            hand_y += s(3)
         elif arm_frame == -1:
-            hand_x += 1 * scale
-            hand_y += 4 * scale
+            hand_x += s(1)
+            hand_y += s(4)
         elif arm_frame == 2:
-            hand_x += 4 * scale
-            hand_y -= 2 * scale
+            hand_x += s(4)
+            hand_y -= s(2)
 
         for layer in defs.LAYER_ORDER:
             part_key = layer
@@ -123,13 +208,9 @@ class CharacterComposer:
                 if part_key == "legs":
                     style = "pants"
 
-            # Helper to scale logic
-            def s(val):
-                return val * scale
-
             if layer == "back":
                 style = self.selections.get("back", "none")
-                self.draw_part(draw, "back", style, offset_x, bob, scale)
+                self.draw_part(draw, "back", style, offset_x, bob, scale, render_mode)
 
             elif layer == "legs_back":
                 lx, ly = s(12), s(24) + bob
@@ -144,7 +225,9 @@ class CharacterComposer:
                 if leg_frame == -2:
                     lx -= s(2)
                     ly -= s(4)
-                self.draw_part(draw, "legs", style, offset_x + lx, ly, scale)
+                self.draw_part(
+                    draw, "legs", style, offset_x + lx, ly, scale, render_mode
+                )
 
             elif layer == "legs_front":
                 rx, ry = s(17), s(24) + bob
@@ -159,82 +242,87 @@ class CharacterComposer:
                 if leg_frame == -2:
                     rx += s(1)
                     ry -= s(1)
-                self.draw_part(draw, "legs", style, offset_x + rx, ry, scale)
+                self.draw_part(
+                    draw, "legs", style, offset_x + rx, ry, scale, render_mode
+                )
 
             elif layer == "arms":
                 color = self.get_color("shirt")
                 ay = s(17) + bob
-                if arm_frame == 0:
-                    draw.rectangle(
-                        [offset_x + s(10), ay, offset_x + s(11), ay + s(6)], fill=color
-                    )
-                    draw.rectangle(
-                        [offset_x + s(20), ay, offset_x + s(21), ay + s(6)], fill=color
-                    )
-                elif arm_frame == 1:
-                    draw.rectangle(
-                        [offset_x + s(10), ay - s(1), offset_x + s(11), ay + s(5)],
-                        fill=color,
-                    )
-                    draw.rectangle(
-                        [offset_x + s(20), ay + s(1), offset_x + s(22), ay + s(4)],
-                        fill=color,
-                    )
+
+                is_hd = (render_mode == "hd") and (scale >= 4.0)
+                is_sketch = render_mode == "sketch"
+
+                rect_func = draw.rectangle
+                kwargs = {"fill": color}
+
+                if is_hd:
+                    radius = scale * 0.4
+                    outline_color = self.adjust_color(color, 0.6)
+                    kwargs = {
+                        "radius": radius,
+                        "fill": color,
+                        "outline": outline_color,
+                        "width": int(max(1, scale * 0.15)),
+                    }
+                    rect_func = draw.rounded_rectangle
+                elif is_sketch:
+                    kwargs = {"fill": color, "outline": self.adjust_color(color, 0.5)}
+                    # rect_func remains draw.rectangle but we rely on simple draw for procedural arms
+                    # Arms in sketch mode might look too clean. Let's apply jitter manually?
+                    # For now, just use standard rect
+
+                # Arm Coords
+                l_rect = [offset_x + s(10), ay, offset_x + s(11), ay + s(6)]
+                r_rect = [offset_x + s(20), ay, offset_x + s(21), ay + s(6)]
+
+                if arm_frame == 1:
+                    l_rect = [offset_x + s(10), ay - s(1), offset_x + s(11), ay + s(5)]
+                    r_rect = [offset_x + s(20), ay + s(1), offset_x + s(22), ay + s(4)]
                 elif arm_frame == -1:
-                    draw.rectangle(
-                        [offset_x + s(10), ay + s(1), offset_x + s(12), ay + s(4)],
-                        fill=color,
-                    )
-                    draw.rectangle(
-                        [offset_x + s(20), ay - s(1), offset_x + s(21), ay + s(5)],
-                        fill=color,
-                    )
+                    l_rect = [offset_x + s(10), ay + s(1), offset_x + s(12), ay + s(4)]
+                    r_rect = [offset_x + s(20), ay - s(1), offset_x + s(21), ay + s(5)]
                 elif arm_frame == 2:
-                    draw.rectangle(
-                        [offset_x + s(20), ay - s(2), offset_x + s(24), ay], fill=color
-                    )
-                    draw.rectangle(
-                        [offset_x + s(10), ay + s(1), offset_x + s(11), ay + s(6)],
-                        fill=color,
-                    )
+                    r_rect = [offset_x + s(20), ay - s(2), offset_x + s(24), ay]
+                    l_rect = [offset_x + s(10), ay + s(1), offset_x + s(11), ay + s(6)]
+
+                rect_func(l_rect, **kwargs)
+                rect_func(r_rect, **kwargs)
 
             elif layer == "held":
                 style = self.selections.get("held", "none")
                 if style != "none":
                     self.draw_part(
-                        draw, "held", style, offset_x + hand_x, hand_y, scale
+                        draw,
+                        "held",
+                        style,
+                        offset_x + hand_x,
+                        hand_y,
+                        scale,
+                        render_mode,
                     )
 
             elif layer in ["body", "head", "eyes", "hair"]:
-                self.draw_part(draw, part_key, style, offset_x, bob, scale)
+                self.draw_part(draw, part_key, style, offset_x, bob, scale, render_mode)
 
 
 def create_character_spritesheet(
     filename=None,
     config_source="character_config.yaml",
     action="walk",
-    resolution=128,
+    density=1.0,
+    output_size=512,
     render_mode="retro",
 ):
-    """
-    render_mode: 'retro' (scale after), 'hd' (scale coords)
-    """
     composer = CharacterComposer(config_source)
     anim_def = defs.ANIMATION_DEFINITIONS.get(
         action, defs.ANIMATION_DEFINITIONS["walk"]
     )
     frames = len(anim_def)
-
-    # Base dimensions
-    base_w, base_h = composer.width, composer.height  # 32x32
-
-    scale_factor = 1
-    if render_mode == "hd":
-        scale_factor = max(1, resolution // base_h)
-        draw_w, draw_h = base_w * scale_factor, base_h * scale_factor
-    else:
-        draw_w, draw_h = base_w, base_h
-
+    base_w, base_h = composer.width, composer.height
+    internal_scale = density
+    draw_w = int(base_w * internal_scale)
+    draw_h = int(base_h * internal_scale)
     sheet_w = draw_w * frames
     sheet_h = draw_h
 
@@ -243,53 +331,61 @@ def create_character_spritesheet(
 
     for f in range(frames):
         config = anim_def[f]
-        composer.compose_frame(draw, f * draw_w, config, scale=scale_factor)
+        composer.compose_frame(
+            draw, f * draw_w, config, scale=internal_scale, render_mode=render_mode
+        )
 
-    # Post-process resize for Retro mode
-    if render_mode == "retro" and resolution != base_h:
-        # Scale whole sheet
-        target_scale = resolution / base_h
-        new_w = int(sheet_w * target_scale)
-        new_h = int(sheet_h * target_scale)
-        img = img.resize((new_w, new_h), Image.NEAREST)
+    target_h = output_size
+    target_w = int(target_h * (sheet_w / sheet_h))
+
+    resample_mode = (
+        Image.Resampling.LANCZOS if density >= 4.0 else Image.Resampling.NEAREST
+    )
+    img = img.resize((target_w, target_h), resample_mode)
+
+    # 应用艺术滤镜后处理
+    effect_func = post_effects.get_post_effect_for_mode(render_mode)
+    img = effect_func(img)
 
     if filename:
         img.save(filename)
-
     return img
 
 
 def create_character_gif(
     config_source="character_config.yaml",
     action="walk",
-    resolution=128,
+    density=1.0,
+    output_size=512,
     render_mode="retro",
 ):
     composer = CharacterComposer(config_source)
     anim_def = defs.ANIMATION_DEFINITIONS.get(
         action, defs.ANIMATION_DEFINITIONS["walk"]
     )
-
     base_w, base_h = composer.width, composer.height
-
-    scale_factor = 1
-    if render_mode == "hd":
-        scale_factor = max(1, resolution // base_h)
-        draw_w, draw_h = base_w * scale_factor, base_h * scale_factor
-    else:
-        draw_w, draw_h = base_w, base_h
+    internal_scale = density
+    draw_w = int(base_w * internal_scale)
+    draw_h = int(base_h * internal_scale)
 
     frames = []
     for f_config in anim_def:
         frame_img = Image.new("RGBA", (draw_w, draw_h), (0, 0, 0, 0))
         draw = ImageDraw.Draw(frame_img)
-        composer.compose_frame(draw, 0, f_config, scale=scale_factor)
+        composer.compose_frame(
+            draw, 0, f_config, scale=internal_scale, render_mode=render_mode
+        )
 
-        if render_mode == "retro" and resolution != base_h:
-            target_scale = resolution / base_h
-            new_w = int(draw_w * target_scale)
-            new_h = int(draw_h * target_scale)
-            frame_img = frame_img.resize((new_w, new_h), Image.NEAREST)
+        target_h = output_size
+        target_w = int(target_h * (draw_w / draw_h))
+        resample_mode = (
+            Image.Resampling.LANCZOS if density >= 4.0 else Image.Resampling.NEAREST
+        )
+        frame_img = frame_img.resize((target_w, target_h), resample_mode)
+
+        # 应用艺术滤镜（每一帧都处理）
+        effect_func = post_effects.get_post_effect_for_mode(render_mode)
+        frame_img = effect_func(frame_img)
 
         frames.append(frame_img)
 
@@ -309,5 +405,6 @@ def create_character_gif(
 
 
 if __name__ == "__main__":
-    # Test
-    create_character_spritesheet("test_hd.png", resolution=128, render_mode="hd")
+    create_character_spritesheet(
+        "test_sketch.png", density=8.0, output_size=512, render_mode="sketch"
+    )
