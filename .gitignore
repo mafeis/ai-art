@@ -14,3 +14,11 @@ bak/
 unused_scripts/
 *.png
 !scene_bg.png
+
+# Node dependencies
+node_modules/
+dist/
+.npm
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
