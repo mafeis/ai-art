@@ -31,10 +31,21 @@ class CharacterComposer:
         return self.palette.get(key, (255, 0, 255))
 
     def adjust_color(self, color, factor):
-        r, g, b = color
+        # Unpack explicitly to handle potential RGBA inputs gracefully
+        if len(color) >= 3:
+            r, g, b = color[:3]
+            a = color[3] if len(color) > 3 else None
+        else:
+            # Fallback for weird data
+            r, g, b = 0, 0, 0
+            a = None
+
         r = min(255, int(r * factor))
         g = min(255, int(g * factor))
         b = min(255, int(b * factor))
+
+        if a is not None:
+            return (r, g, b, a)
         return (r, g, b)
 
     def draw_part(
