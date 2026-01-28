@@ -10,7 +10,7 @@ import random
 
 def apply_ink_effect(image):
     """
-    水墨效果：纸质纹理 + 墨迹扩散
+    水墨效果：墨迹扩散 + 对比度增强 (去除噪点)
     适用于仙侠风格
     """
     # 确保是 RGB 模式
@@ -18,28 +18,25 @@ def apply_ink_effect(image):
         image = image.convert("RGB")
 
     # 1. 轻微模糊模拟墨迹晕染
-    blurred = image.filter(ImageFilter.GaussianBlur(radius=0.5))
+    blurred = image.filter(ImageFilter.GaussianBlur(radius=0.8))
 
-    # 2. 生成纸质纹理
-    paper = tex.generate_paper_texture(image.size, grain_intensity=0.4)
+    # 2. 混合原图和模糊图 (代替复杂的纸张纹理)
+    result = Image.blend(image, blurred, alpha=0.4)
 
-    # 3. 混合纹理（模拟 multiply 模式）
-    result = Image.blend(blurred, paper, alpha=0.15)
-
-    # 4. 轻微降低饱和度，增加水墨感
+    # 3. 轻微降低饱和度，增加水墨感
     enhancer = ImageEnhance.Color(result)
-    result = enhancer.enhance(0.85)
+    result = enhancer.enhance(0.7)
 
-    # 5. 增强对比度
+    # 4. 增强对比度
     contrast = ImageEnhance.Contrast(result)
-    result = contrast.enhance(1.1)
+    result = contrast.enhance(1.2)
 
     return result
 
 
 def apply_neon_glow(image):
     """
-    霓虹发光：外发光 + 扫描线
+    霓虹发光：外发光 (去除扫描线)
     适用于赛博朋克风格
     """
     # 确保是 RGB 模式
@@ -49,82 +46,65 @@ def apply_neon_glow(image):
     # 1. 找到明亮区域，制造发光效果
     # 先增强对比度，让亮部更亮
     contrast = ImageEnhance.Contrast(image)
-    enhanced = contrast.enhance(1.3)
+    enhanced = contrast.enhance(1.4)
 
     # 2. 应用高斯模糊制造发光
-    glow = enhanced.filter(ImageFilter.GaussianBlur(radius=3))
+    glow = enhanced.filter(ImageFilter.GaussianBlur(radius=4))
 
     # 3. 叠加原图 + 发光层
-    result = Image.blend(image, glow, alpha=0.4)
+    result = Image.blend(image, glow, alpha=0.5)
 
-    # 4. 添加扫描线纹理
-    scanlines = tex.generate_scanline_texture(image.size, line_spacing=3)
-    result_rgba = result.convert("RGBA")
-    result = Image.alpha_composite(result_rgba, scanlines).convert("RGB")
-
-    # 5. 增强饱和度（赛博朋克色彩更鲜艳）
+    # 4. 增强饱和度（赛博朋克色彩更鲜艳）
     enhancer = ImageEnhance.Color(result)
-    result = enhancer.enhance(1.3)
-
-    # 6. 轻微锐化
-    result = result.filter(ImageFilter.SHARPEN)
+    result = enhancer.enhance(1.4)
 
     return result
 
 
 def apply_sketch_texture(image):
     """
-    手绘质感：铅笔纹理 + 边缘强化
+    手绘质感：边缘强化 (去除噪点纹理)
     适用于素描、手绘风格
     """
     # 确保是 RGB 模式
     if image.mode != "RGB":
         image = image.convert("RGB")
 
-    # 1. 强化边缘
+    # 1. 强化边缘 (更强烈的线条感)
     edges = image.filter(ImageFilter.EDGE_ENHANCE_MORE)
 
-    # 2. 轻微降低饱和度
+    # 再次强化以模拟铅笔硬朗感
+    edges = edges.filter(ImageFilter.SHARPEN)
+
+    # 2. 降低饱和度
     enhancer = ImageEnhance.Color(edges)
-    desaturated = enhancer.enhance(0.7)
+    result = enhancer.enhance(0.5)
 
-    # 3. 叠加纸张纹理
-    paper = tex.generate_paper_texture(image.size, grain_intensity=0.5)
-    result = Image.blend(desaturated, paper, alpha=0.2)
-
-    # 4. 增加粗糙感（添加细微噪点）
-    noise = tex.generate_noise_texture(image.size, intensity=0.1)
-    result = Image.blend(result, noise, alpha=0.08)
+    # 3. 增强亮度 (模拟白纸背景，但不加纹理)
+    brightness = ImageEnhance.Brightness(result)
+    result = brightness.enhance(1.1)
 
     return result
 
 
 def apply_retro_crt(image):
     """
-    复古 CRT：扫描线 + 颗粒噪点 + 色差
+    复古 CRT：色差 + 模糊 (去除噪点和扫描线)
     适用于 80 年代像素风
     """
     # 确保是 RGB 模式
     if image.mode != "RGB":
         image = image.convert("RGB")
 
-    # 1. 添加横向扫描线
-    scanlines = tex.generate_scanline_texture(image.size, line_spacing=2)
-    result_rgba = image.convert("RGBA")
-    result = Image.alpha_composite(result_rgba, scanlines).convert("RGB")
+    # 1. RGB 色差效果（模拟 CRT 屏幕）
+    result = apply_chromatic_aberration(image, offset=2)
 
-    # 2. 添加噪点（颗粒感）
-    noise = tex.generate_noise_texture(image.size, intensity=0.15)
-    result = Image.blend(result, noise, alpha=0.12)
+    # 2. 轻微降低锐度（模拟 CRT 荧光粉扩散）
+    result = result.filter(ImageFilter.GaussianBlur(radius=0.4))
 
-    # 3. RGB 色差效果（模拟 CRT 屏幕）
-    result = apply_chromatic_aberration(result, offset=2)
-
-    # 4. 轻微降低锐度（模拟 CRT 模糊）
-    result = result.filter(ImageFilter.SMOOTH)
-
-    # 5. 轻微暗角
-    result = tex.apply_vignette(result, intensity=0.2)
+    # 3. 增强对比度
+    contrast = ImageEnhance.Contrast(result)
+    result = contrast.enhance(1.1)
 
     return result
 
