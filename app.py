@@ -116,8 +116,12 @@ def randomize():
 
     for key, default_val in defs.DEFAULT_PALETTE.items():
         if key in theme_palette_def:
-            # Use fixed theme color
-            new_palette[key] = theme_palette_def[key]
+            # Use fixed theme color WITH JITTER (+/- 30)
+            # This ensures "Random Palette" still produces variations even in strict themes
+            base_rgb = theme_palette_def[key]
+            new_palette[key] = [
+                max(0, min(255, c + random.randint(-30, 30))) for c in base_rgb
+            ]
         else:
             # Randomize variations for non-critical colors?
             # Or stick to default? Let's add slight variation to default to keep it alive
@@ -145,51 +149,83 @@ def generate_image():
         if not config:
             return jsonify({"error": "No config provided"}), 400
 
-        action = config.get("action", "walk")
+        # Support for batch generation
+        # Check if 'actions' (list) is provided in config.
+        # If so, generate for all. If not, check 'action' (single).
+        actions = config.get("actions", [])
+        if not actions:
+            # Fallback to single action mode (backward compatibility)
+            single_action = config.get("action", "walk")
+            actions = [single_action]
+
+        # Deduplicate but keep order
+        actions = list(dict.fromkeys(actions))
+
+        # Limit batch size to prevent server overload
+        if len(actions) > 8:
+            actions = actions[:8]
+
         density = float(config.get("density", 1.0))
+        # Default to 16-bit (1.0) if not specified, though user requested 16-bit default in UI
+        # The UI sends the value.
+
         output_size = 512
         render_mode = config.get("render_mode", "retro")
 
         if render_mode == "hollow_knight":
             return jsonify({"error": "Mode moved to experimental"}), 400
 
-        img_sheet = gen_character.create_character_spritesheet(
-            filename=None,
-            config_source=config,
-            action=action,
-            density=density,
-            output_size=output_size,
-            render_mode=render_mode,
-        )
-        buf_png = io.BytesIO()
-        img_sheet.save(buf_png, format="PNG")
-        buf_png.seek(0)
-        png_bytes = buf_png.getvalue()
-        png_base64 = base64.b64encode(png_bytes).decode("utf-8")
+        results = {}
+        total_size_kb = 0
 
-        # Calculate stats
-        size_kb = len(png_bytes) / 1024
+        # Loop through actions
+        for act in actions:
+            # Generate GIF (Preview)
+            buf_gif = gen_character.create_character_gif(
+                config_source=config,
+                action=act,
+                density=density,
+                output_size=output_size,
+                render_mode=render_mode,
+            )
+            gif_base64 = base64.b64encode(buf_gif.getvalue()).decode("utf-8")
+
+            # Generate PNG (Sprite Sheet) for Download
+            img_sheet = gen_character.create_character_spritesheet(
+                filename=None,
+                config_source=config,
+                action=act,
+                density=density,
+                output_size=output_size,
+                render_mode=render_mode,
+            )
+            buf_png = io.BytesIO()
+            img_sheet.save(buf_png, format="PNG")
+            buf_png.seek(0)
+            png_bytes = buf_png.getvalue()
+            png_base64 = base64.b64encode(png_bytes).decode("utf-8")
+
+            size_kb = len(png_bytes) / 1024
+            total_size_kb += size_kb
+
+            results[act] = {
+                "image": f"data:image/gif;base64,{gif_base64}",
+                "download_data": f"data:image/png;base64,{png_base64}",
+                "filename": f"character_{act}_{render_mode}.png",
+                "size_kb": round(size_kb, 1),
+            }
+
         duration = time.time() - start_time
-
-        buf_gif = gen_character.create_character_gif(
-            config_source=config,
-            action=action,
-            density=density,
-            output_size=output_size,
-            render_mode=render_mode,
-        )
-        gif_base64 = base64.b64encode(buf_gif.getvalue()).decode("utf-8")
 
         return jsonify(
             {
-                "image": f"data:image/gif;base64,{gif_base64}",
-                "download_data": f"data:image/png;base64,{png_base64}",
-                "filename": f"character_{action}_{render_mode}.png",
+                "results": results,  # Map of action -> {image, download_data, ...}
                 "stats": {
                     "duration": round(duration, 2),
-                    "size_kb": round(size_kb, 1),
+                    "total_size_kb": round(total_size_kb, 1),
                     "width": output_size,
                     "height": output_size,
+                    "count": len(actions),
                 },
             }
         )
