@@ -193,9 +193,8 @@ def randomize():
             new_palette[key] = random_hsv_color()
 
     # 5. Recommended Render Mode
-    rec_render_mode = defs.THEME_RENDER_MODES.get(
-        selected_theme, "hibit"
-    )  # Default to hibit for better look
+    # [Modified] Force fixed render mode as requested
+    rec_render_mode = "hibit"
 
     return jsonify(
         {
