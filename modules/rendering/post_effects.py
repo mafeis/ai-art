@@ -172,6 +172,24 @@ def apply_chromatic_aberration(image, offset=2):
     return Image.merge("RGB", (r_shifted, g_shifted, b_shifted))
 
 
+def apply_premium_polish(image):
+    """
+    高端模式抛光：锐化 + 微调对比度
+    """
+    image = _ensure_rgba(image)
+    rgb_img = image.convert("RGB")
+
+    # 1. 轻微锐化，突出描边细节
+    sharpener = ImageEnhance.Sharpness(rgb_img)
+    result = sharpener.enhance(1.2)
+
+    # 2. 增强色彩饱和度，使其看起来更鲜艳
+    color_enhancer = ImageEnhance.Color(result)
+    result = color_enhancer.enhance(1.1)
+
+    return _apply_effect_with_alpha_mask(image, result)
+
+
 def get_post_effect_for_mode(render_mode):
     effects = {
         "ink": apply_ink_effect,
@@ -179,5 +197,7 @@ def get_post_effect_for_mode(render_mode):
         "sketch": apply_sketch_texture,
         "retro": apply_retro_crt,
         "hd": apply_vector_polish,
+        "premium": apply_premium_polish,
+        "hibit": lambda x: x,  # Hi-Bit 保持像素纯净，不加滤镜
     }
     return effects.get(render_mode, lambda x: x)

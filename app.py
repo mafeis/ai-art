@@ -28,6 +28,7 @@ import yaml
 import io
 import base64
 import random
+import colorsys
 
 app = Flask(__name__)
 
@@ -93,19 +94,24 @@ def randomize():
     if selected_theme == "steampunk":
         target_tags.append("western")
 
-    # 3. Pick Parts (Priority: Exact Match > Compatible > Generic)
+    # 3. Pick Parts
     new_parts = {}
     for part_key, styles in defs.PART_DEFINITIONS.items():
-        part_tags_map = defs.PART_TAGS.get(part_key, {})
+        # 如果该部件没有任何样式定义，跳过
+        if not styles:
+            continue
 
-        # Categorize styles by match level
+        part_tags_map = defs.PART_TAGS.get(part_key, {})
+        all_styles = list(styles.keys())
+
+        # Categorize
         exact_matches = []
         compatible_matches = []
         generic_matches = []
 
-        for style_name in styles.keys():
+        for style_name in all_styles:
             style_tags = part_tags_map.get(style_name, [])
-            if not style_tags:  # Assume generic if no tags
+            if not style_tags:
                 generic_matches.append(style_name)
                 continue
 
@@ -116,49 +122,87 @@ def randomize():
             elif "generic" in style_tags:
                 generic_matches.append(style_name)
 
-        # Selection Strategy: 70% Exact, 20% Compatible, 10% Generic (if available)
+        # 构建随机池
         pool = []
-        if exact_matches:
-            pool.extend(exact_matches * 10)  # Weighted heavily
-        if compatible_matches:
-            pool.extend(compatible_matches * 3)
-        if generic_matches:
-            pool.extend(generic_matches * 1)
 
+        if theme == "all":
+            # 混合模式：完全随机
+            pool = all_styles
+        else:
+            # 主题模式：加权随机
+            if exact_matches:
+                pool.extend(exact_matches * 50)  # 极大增加匹配主题的概率
+            if compatible_matches:
+                pool.extend(compatible_matches * 10)
+            if generic_matches:
+                pool.extend(generic_matches * 2)
+
+            # 保底：加入所有选项，防止死锁，但权重极低
+            pool.extend(all_styles * 1)
+
+        # 再次检查 pool 是否为空（理论上不应该，因为加了 all_styles）
         if not pool:
-            # Fallback to anything
-            pool = list(styles.keys())
+            pool = all_styles
 
         new_parts[part_key] = random.choice(pool)
 
-    # 4. Enforce Theme Palette
-    # If theme defines a palette, use it. Otherwise random.
-    theme_palette_def = defs.THEME_PALETTES.get(selected_theme, {})
+    # 4. Completely Random Palette (Smart HSV)
     new_palette = {}
 
-    for key, default_val in defs.DEFAULT_PALETTE.items():
-        if key in theme_palette_def:
-            # Use fixed theme color WITH JITTER (+/- 30)
-            # This ensures "Random Palette" still produces variations even in strict themes
-            base_rgb = theme_palette_def[key]
-            new_palette[key] = [
-                max(0, min(255, c + random.randint(-30, 30))) for c in base_rgb
-            ]
+    def random_hsv_color(min_s=0.4, max_s=0.9, min_v=0.6, max_v=1.0):
+        """生成好看的随机颜色"""
+        h = random.random()
+        s = random.uniform(min_s, max_s)
+        v = random.uniform(min_v, max_v)
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        return [int(r * 255), int(g * 255), int(b * 255)]
+
+    for key in defs.DEFAULT_PALETTE.keys():
+        if key == "skin":
+            # 肤色逻辑: 80% 自然色, 20% 奇幻色
+            if random.random() < 0.8:
+                # 自然肤色 (偏黄/红)
+                h = random.uniform(0.05, 0.12)
+                s = random.uniform(0.2, 0.5)
+                v = random.uniform(0.8, 1.0)
+                r, g, b = colorsys.hsv_to_rgb(h, s, v)
+                new_palette[key] = [int(r * 255), int(g * 255), int(b * 255)]
+            else:
+                # 奇幻肤色 (任意色相)
+                new_palette[key] = random_hsv_color(min_s=0.3, max_s=0.6)
+
+        elif key == "metal":
+            # 金属逻辑: 银/灰/金/铜
+            roll = random.random()
+            if roll < 0.5:  # 银灰
+                val = random.randint(150, 220)
+                new_palette[key] = [val, val, val]
+            elif roll < 0.75:  # 金色
+                new_palette[key] = [255, 215, 0]
+            else:  # 铜/锈
+                new_palette[key] = [184, 115, 51]
+
+        elif key in ["highlight", "outline"]:
+            if key == "outline":
+                new_palette[key] = random_hsv_color(max_v=0.3)  # 深色
+            else:
+                new_palette[key] = random_hsv_color(min_v=0.9, min_s=0.0)  # 亮色
+
         else:
-            # Randomize variations for non-critical colors?
-            # Or stick to default? Let's add slight variation to default to keep it alive
-            # But for theme consistency, fixed is better.
-            new_palette[key] = default_val
+            # 头发、衣服、鞋子等 -> 完全随机鲜艳色
+            new_palette[key] = random_hsv_color()
 
     # 5. Recommended Render Mode
-    rec_render_mode = defs.THEME_RENDER_MODES.get(selected_theme, "retro")
+    rec_render_mode = defs.THEME_RENDER_MODES.get(
+        selected_theme, "hibit"
+    )  # Default to hibit for better look
 
     return jsonify(
         {
             "parts": new_parts,
             "palette": new_palette,
             "render_mode": rec_render_mode,
-            "theme": selected_theme,  # Return actual theme used (for UI update)
+            "theme": selected_theme,
         }
     )
 
@@ -191,7 +235,11 @@ def generate_image():
         # Default to 16-bit (1.0) if not specified, though user requested 16-bit default in UI
         # The UI sends the value.
 
-        output_size = 512
+        # [优化] 支持自定义输出尺寸 (512, 1024, 2048)
+        output_size = int(config.get("output_size", 512))
+        if output_size > 2048:
+            output_size = 2048  # Cap for safety
+
         render_mode = config.get("render_mode", "retro")
 
         if render_mode == "hollow_knight":

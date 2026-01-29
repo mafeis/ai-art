@@ -32,8 +32,7 @@
             --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02);
-            --shadow-float: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-
+            
             --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             --transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
@@ -94,30 +93,6 @@
             flex-direction: column;
         }
 
-        .lang-switch {
-            display: flex;
-            gap: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: var(--bg-color);
-            padding: 4px;
-            border-radius: 6px;
-        }
-
-        .lang-opt {
-            padding: 2px 6px;
-            cursor: pointer;
-            border-radius: 4px;
-            color: var(--text-tertiary);
-            transition: var(--transition);
-        }
-
-        .lang-opt.active {
-            background: white;
-            color: var(--text-primary);
-            box-shadow: var(--shadow-sm);
-        }
-
         .logo-title {
             font-size: 1.5rem;
             font-weight: 800;
@@ -151,30 +126,27 @@
             background-size: 40px 40px;
             background-color: #fafafa;
             padding: 20px;
-            overflow: hidden; /* Prevent scrollbars */
+            overflow: hidden; 
         }
 
         .preview-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px; /* Slightly tighter gap */
+            gap: 12px; 
             width: 100%;
-            /* Smart Scaling: Width limited by Height to ensure it fits in view */
-            /* Grid is roughly square. We want Height < 100vh - Tools - Padding */
-            /* 100vh - 140px (tools+stats+padding) */
             max-width: min(800px, calc(100vh - 200px));
         }
 
         .preview-card-item {
             background: var(--surface);
-            padding: 10px; /* Slightly reduced padding */
+            padding: 10px;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px; /* Reduced gap */
+            gap: 8px;
             transition: var(--transition);
         }
         
@@ -415,28 +387,13 @@
             transform: translateY(0);
         }
 
-        .btn-secondary {
-            background: var(--bg-color);
-            color: var(--text-primary);
-        }
-        
-        .btn-secondary:hover {
-            background: #e9ecef;
-        }
-
-        .btn-icon {
-            padding: 10px;
-            flex: 0 0 auto;
-        }
-
         /* Overlay / Floating UI */
         .floating-tools {
-            /* Removed absolute positioning */
             margin-top: 10px;
             display: flex;
             gap: 16px;
             background: var(--surface);
-            padding: 8px 16px; /* Compact padding */
+            padding: 8px 16px;
             border-radius: 100px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
@@ -482,6 +439,7 @@
             transform: translateY(-20px);
             transition: var(--transition);
             pointer-events: none;
+            z-index: 100;
         }
         
         .status-toast.visible {
@@ -519,23 +477,19 @@
             <div class="logo-area">
                 <div class="logo-text-group">
                     <h1 class="logo-title">
-                        Pixel Forge 
+                        水浒工坊 
                         <span class="logo-badge">Pro</span>
                     </h1>
-                    <p style="font-size: 0.85rem; color: var(--text-tertiary); margin-top: 5px;" data-i18n="ui.subtitle">
-                        水浒角色生成器
+                    <p style="font-size: 0.85rem; color: var(--text-tertiary); margin-top: 5px;">
+                        高清像素角色生成器 v2.1
                     </p>
-                </div>
-                <div class="lang-switch">
-                    <div class="lang-opt active" onclick="setLanguage('zh')" id="lang-zh">中</div>
-                    <div class="lang-opt" onclick="setLanguage('en')" id="lang-en">EN</div>
                 </div>
             </div>
 
             <!-- Global Settings -->
             <div class="control-section">
                 <div class="section-header">
-                    <span data-i18n="ui.theme">风格与主题</span>
+                    <span>风格与主题</span>
                     <button class="tool-btn" onclick="randomizeAll()" title="全局随机">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                     </button>
@@ -543,13 +497,13 @@
                 <div class="control-grid full">
                     <div class="select-wrapper">
                         <select id="theme-select">
-                            <option value="all" data-i18n="theme.all">🎲 混合风格</option>
-                            <option value="xianxia" data-i18n="theme.xianxia">🏔️ 仙侠</option>
-                            <option value="tech" data-i18n="theme.tech">🦾 科技</option>
-                            <option value="western" data-i18n="theme.western">🏰 魔幻</option>
-                            <option value="cyberpunk" data-i18n="theme.cyberpunk">🌃 赛博朋克</option>
-                            <option value="steampunk" data-i18n="theme.steampunk">⚙️ 蒸汽朋克</option>
-                            <option value="horror" data-i18n="theme.horror">👻 恐怖</option>
+                            <option value="all">🎲 混合风格</option>
+                            <option value="xianxia">🏔️ 仙侠 / 古风</option>
+                            <option value="tech">🦾 未来科技</option>
+                            <option value="western">🏰 西方魔幻</option>
+                            <option value="cyberpunk">🌃 赛博朋克</option>
+                            <option value="steampunk">⚙️ 蒸汽朋克</option>
+                            <option value="horror">👻 恐怖 / 丧尸</option>
                         </select>
                         <svg class="select-icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
                     </div>
@@ -559,29 +513,23 @@
             <!-- Render Settings -->
             <div class="control-section">
                 <div class="section-header">
-                    <span data-i18n="ui.quality">画质</span>
+                    <span>渲染风格</span>
                 </div>
                 
-                <div style="margin-bottom: 15px;">
-                    <div class="label" style="margin-bottom: 8px;" data-i18n="ui.density">像素密度</div>
-                    <div class="segmented-control" id="density-control">
-                        <button class="segment-btn" data-value="0.5">8-bit</button>
-                        <button class="segment-btn active" data-value="1.0">16-bit</button>
-                        <button class="segment-btn" data-value="2.0">32-bit</button>
-                        <button class="segment-btn" data-value="4.0">64-bit</button>
-                    </div>
-                    <input type="hidden" id="density-select" value="1.0">
-                </div>
+                <!-- 隐藏的默认参数：512px + 8.0(超清) -->
+                <input type="hidden" id="output-size-select" value="512">
+                <input type="hidden" id="density-select" value="8.0">
 
                 <div>
-                    <div class="label" style="margin-bottom: 8px;" data-i18n="ui.render_style">渲染风格</div>
                     <div class="select-wrapper">
                         <select id="render-mode-select" onchange="generateImage()">
-                            <option value="retro" data-i18n="style.retro">👾 标准像素</option>
-                            <option value="hd" data-i18n="style.hd">📐 矢量高清</option>
-                            <option value="sketch" data-i18n="style.sketch">✏️ 手绘草图</option>
-                            <option value="neon" data-i18n="style.neon">⚡️ 赛博霓虹</option>
-                            <option value="ink" data-i18n="style.ink">🖌️ 水墨丹青</option>
+                            <option value="hibit">✨ 现代高位 (推荐)</option>
+                            <option value="retro">👾 标准像素</option>
+                            <option value="premium">💎 精致 2.5D</option>
+                            <option value="hd">📐 矢量高清</option>
+                            <option value="sketch">✏️ 手绘草图</option>
+                            <option value="neon">⚡️ 赛博霓虹</option>
+                            <option value="ink">🖌️ 水墨丹青</option>
                         </select>
                         <svg class="select-icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
                     </div>
@@ -591,14 +539,14 @@
             <!-- Appearance -->
             <div class="control-section">
                 <div class="section-header">
-                    <span data-i18n="ui.appearance">外观</span>
+                    <span>外观组件</span>
                     <button class="tool-btn" onclick="randomizeParts()" title="外观随机" style="width: 24px; height: 24px; padding: 0;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
                     </button>
                 </div>
                 
                 <div class="input-group" style="margin-bottom: 15px;">
-                     <div class="label"><span data-i18n="ui.actions_label">动作展示</span> <span style="font-weight:normal;color:#999;font-size:0.7em" data-i18n="ui.actions_hint">多选/Max 4</span></div>
+                     <div class="label">动作预览 <span style="font-weight:normal;color:#999;font-size:0.7em">(多选 / 最多4个)</span></div>
                      <div id="action-control-container">
                         <!-- JS generated buttons -->
                      </div>
@@ -612,7 +560,7 @@
             <!-- Palette -->
             <div class="control-section">
                 <div class="section-header">
-                    <span data-i18n="ui.palette">配色</span>
+                    <span>角色配色</span>
                     <button class="tool-btn" onclick="randomizePalette()" title="配色随机" style="width: 24px; height: 24px; padding: 0;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
                     </button>
@@ -625,7 +573,7 @@
             <!-- Actions -->
             <div class="action-bar">
                 <button id="generate-btn" class="btn btn-primary" onclick="generateImage()">
-                    <span data-i18n="ui.generate_btn">生成角色</span>
+                    生成角色
                 </button>
             </div>
             
@@ -636,7 +584,7 @@
         <!-- RIGHT STAGE: PREVIEW -->
         <main class="stage">
             <div class="status-toast" id="status-toast">
-                <span>✨</span> <span id="toast-msg">Ready</span>
+                <span>✨</span> <span id="toast-msg">就绪</span>
             </div>
 
             <!-- Grid of Previews -->
@@ -649,7 +597,7 @@
 
             <!-- Global Stage Controls -->
             <div class="floating-tools">
-                <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-right: 8px;" data-i18n="ui.canvas_bg">
+                <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-right: 8px;">
                     画布背景
                 </div>
                 
@@ -667,186 +615,85 @@
                     <!-- Stats injected here -->
                 </div>
             </div>
-            
-            <!-- Removed bottom stats display -->
         </main>
     </div>
 
     <!-- JS Logic -->
     <script>
-        // --- Internationalization ---
-        const I18N = {
-            zh: {
-                ui: {
-                    subtitle: "水浒角色生成器",
-                    theme: "风格与主题",
-                    quality: "画质",
-                    density: "像素密度",
-                    render_style: "渲染风格",
-                    appearance: "外观",
-                    actions_label: "动作展示",
-                    actions_hint: "多选/Max 4",
-                    palette: "配色",
-                    generate_btn: "生成角色",
-                    generating: "生成中...",
-                    canvas_bg: "画布背景",
-                    download_png: "下载 PNG",
-                    toast_batch: "批量生成完毕"
-                },
-                theme: {
-                    all: "🎲 混合风格",
-                    xianxia: "🏔️ 仙侠",
-                    tech: "🦾 科技",
-                    western: "🏰 魔幻",
-                    cyberpunk: "🌃 赛博朋克",
-                    steampunk: "⚙️ 蒸汽朋克",
-                    horror: "👻 恐怖"
-                },
-                style: {
-                    retro: "👾 标准像素",
-                    hd: "📐 矢量高清",
-                    sketch: "✏️ 手绘草图",
-                    neon: "⚡️ 赛博霓虹",
-                    ink: "🖌️ 水墨丹青"
-                },
-                parts: {
-                    head: "头部", hair: "发型", eyes: "眼睛", 
-                    body: "躯干", legs: "下肢", back: "背饰", held: "手持"
-                },
-                palette_keys: {
-                    skin: "肤色", hair: "发色", shirt: "上装", 
-                    pants: "下装", boots: "鞋色", eye_color: "瞳色", 
-                    metal: "金属"
-                },
-                options: {
-                    none: "无", human: "人类", elf: "精灵", orc: "兽人", dwarf: "矮人", skeleton: "骷髅",
-                    robot: "机器人", pumpkin: "南瓜头", sage_beard: "长须老者", cyborg_eye: "生化眼",
-                    zombie: "僵尸", gas_mask: "防毒面具", oni: "鬼面",
-                    bald: "光头", short: "短发", long: "长发", mohawk: "莫霍克", ponytail: "马尾",
-                    afro: "爆炸头", wizard_hat: "巫师帽", hood: "兜帽", bandana: "头巾",
-                    topknot: "道士髻", long_flowy: "飘逸长发", helmet: "头盔", mohawk_neon: "霓虹莫霍克",
-                    top_hat: "高顶礼帽", brain_exposed: "大脑外露",
-                    normal: "普通", sunglasses: "墨镜", cyclops: "独眼", visipatch: "战术目镜",
-                    glowing: "发光", tired: "疲惫", goggles: "护目镜",
-                    shirt: "衬衫", armor: "重甲", robe: "法袍", jacket: "夹克", ribs: "肋骨",
-                    suit: "西装", overalls: "背带裤", hanfu_scholar: "汉服(文)", hanfu_warrior: "汉服(武)",
-                    mech_suit: "机甲", jacket_neon: "赛博夹克", coat_brass: "黄铜大衣", ribs_gore: "血腥肋骨",
-                    pants: "长裤", skirt: "裙子", shorts: "短裤", peg_leg: "木腿", boots_high: "长筒靴",
-                    robot_legs: "机械腿",
-                    cape: "披风", wings: "翅膀", backpack: "背包", jetpack: "喷气背包",
-                    flying_swords: "御剑", coffin: "棺材",
-                    sword: "剑", staff: "法杖", axe: "斧头", shield: "盾牌",
-                    jian: "宝剑", fan: "折扇", gourd: "酒葫芦", laser_gun: "激光枪",
-                    katana_laser: "光刃", wrench: "扳手", chainsaw: "电锯", butcher_knife: "屠刀",
-                    idle: "待机", walk: "行走", attack: "攻击", jump: "跳跃",
-                    run: "奔跑", hurt: "受击", die: "死亡", cheer: "欢呼"
-                }
+        // --- 汉化字典 (Simplified Translation Map) ---
+        const TRANSLATIONS = {
+            // UI Labels
+            generating: "正在绘制...",
+            download_png: "保存图片",
+            toast_batch: "生成完毕",
+            
+            // Categories
+            parts: {
+                head: "头部样式", hair: "发型", eyes: "眼部特征", 
+                body: "躯干服饰", legs: "下肢/鞋履", back: "背部装饰", held: "手持道具"
             },
-            en: {
-                ui: {
-                    subtitle: "Shuihu Character Generator",
-                    theme: "Theme & Style",
-                    quality: "Quality",
-                    density: "Density",
-                    render_style: "Render Style",
-                    appearance: "Appearance",
-                    actions_label: "Actions",
-                    actions_hint: "Multi/Max 4",
-                    palette: "Palette",
-                    generate_btn: "Generate",
-                    generating: "Generating...",
-                    canvas_bg: "Canvas BG",
-                    download_png: "Download PNG",
-                    toast_batch: "Batch Generated"
-                },
-                theme: {
-                    all: "🎲 Mixed",
-                    xianxia: "🏔️ Xianxia",
-                    tech: "🦾 Tech",
-                    western: "🏰 Western",
-                    cyberpunk: "🌃 Cyberpunk",
-                    steampunk: "⚙️ Steampunk",
-                    horror: "👻 Horror"
-                },
-                style: {
-                    retro: "👾 Retro Pixel",
-                    hd: "📐 HD Vector",
-                    sketch: "✏️ Sketch",
-                    neon: "⚡️ Neon",
-                    ink: "🖌️ Ink"
-                },
-                parts: {
-                    head: "Head", hair: "Hair", eyes: "Eyes", 
-                    body: "Body", legs: "Legs", back: "Back", held: "Held"
-                },
-                palette_keys: {
-                    skin: "Skin", hair: "Hair", shirt: "Top", 
-                    pants: "Bot", boots: "Shoe", eye_color: "Eye", 
-                    metal: "Mtl"
-                },
-                options: {
-                    // Fallback to capitalizing keys if missing, but let's provide some
-                    none: "None", human: "Human", elf: "Elf", orc: "Orc", dwarf: "Dwarf",
-                    skeleton: "Skeleton", robot: "Robot", pumpkin: "Pumpkin", sage_beard: "Sage Beard",
-                    hanfu_scholar: "Hanfu(Scholar)", hanfu_warrior: "Hanfu(Warrior)", flying_swords: "Flying Swords",
-                    idle: "Idle", walk: "Walk", attack: "Attack", jump: "Jump",
-                    run: "Run", hurt: "Hurt", die: "Die", cheer: "Cheer"
-                }
+            palette: {
+                skin: "皮肤色调", hair: "头发颜色", shirt: "上装主色", 
+                pants: "下装颜色", boots: "鞋履颜色", eye_color: "瞳孔颜色", 
+                metal: "金属材质", highlight: "高光色", outline: "轮廓线",
+                leather: "皮革色", gold: "金色", neon_blue: "霓虹蓝", neon_pink: "霓虹粉"
+            },
+            // Options (Detailed)
+            options: {
+                none: "无 / 默认", 
+                // Heads
+                human: "人类标准脸", elf: "精灵脸(尖耳)", orc: "兽人脸(獠牙)", dwarf: "矮人脸", 
+                skeleton: "骷髅头骨", robot: "机械头", pumpkin: "南瓜头", sage_beard: "长须智者", 
+                cyborg_eye: "半机械改造", zombie: "丧尸脸", gas_mask: "防毒面具", oni: "般若鬼面",
+                // Hair
+                bald: "光头", short: "干练短发", long: "披肩长发", mohawk: "莫霍克发型", ponytail: "马尾辫",
+                afro: "爆炸头", wizard_hat: "法师尖帽", hood: "潜行者兜帽", bandana: "海盗头巾",
+                topknot: "道士发髻", long_flowy: "仙侠飘逸长发", helmet: "重装头盔", mohawk_neon: "赛博霓虹发光",
+                top_hat: "绅士高帽", brain_exposed: "大脑外露",
+                // Eyes
+                normal: "正常眼神", sunglasses: "黑客墨镜", cyclops: "独眼巨人", visipatch: "战术目镜",
+                glowing: "能量发光", tired: "疲惫黑眼圈", goggles: "蒸汽护目镜",
+                // Body
+                shirt: "基础衬衫", armor: "板甲", robe: "长袍/法衣", jacket: "夹克", ribs: "肋骨外露",
+                suit: "西装", overalls: "工装背带裤", hanfu_scholar: "儒雅汉服", hanfu_warrior: "武侠劲装",
+                mech_suit: "动力机甲", jacket_neon: "霓虹夹克", coat_brass: "黄铜大衣", ribs_gore: "血腥肋骨",
+                // Legs
+                pants: "长裤", skirt: "短裙", shorts: "短裤", peg_leg: "海盗木腿", boots_high: "高筒皮靴",
+                robot_legs: "机械义肢",
+                // Back
+                cape: "英雄披风", wings: "天使羽翼", backpack: "冒险背包", jetpack: "喷气背包",
+                flying_swords: "御剑飞行", coffin: "吸血鬼棺材",
+                // Held
+                sword: "铁剑", staff: "法杖", axe: "战斧", shield: "鸢盾",
+                jian: "青锋剑", fan: "折扇", gourd: "酒葫芦", laser_gun: "激光步枪",
+                katana_laser: "光束武士刀", wrench: "巨型扳手", chainsaw: "电锯", butcher_knife: "杀猪刀",
+                // Actions
+                idle: "待机呼吸", walk: "行走", attack: "攻击动作", jump: "跳跃",
+                run: "奔跑冲刺", hurt: "受击/击退", die: "死亡倒地", cheer: "胜利欢呼"
             }
         };
 
-        let currentLang = 'zh';
-
-        function t(keyPath) {
-            const keys = keyPath.split('.');
-            let val = I18N[currentLang];
-            for(const k of keys) {
-                if(val) val = val[k];
-            }
-            return val || keyPath; // fallback
-        }
-
-        // Helper for dynamic content
         function getLabel(category, key) {
-            // First try options map
-            const val = I18N[currentLang].options[key];
-            if(val) return val;
-            
-            // Fallback: Check if it's a specific category like parts or palette
-            if(category === 'parts') return I18N[currentLang].parts[key] || key;
-            if(category === 'palette') return I18N[currentLang].palette_keys[key] || key;
-            
-            // Final fallback: capitalize
-            return key.charAt(0).toUpperCase() + key.slice(1);
-        }
-
-        function setLanguage(lang) {
-            currentLang = lang;
-            
-            // Toggle UI
-            document.querySelectorAll('.lang-opt').forEach(el => el.classList.remove('active'));
-            document.getElementById(`lang-${lang}`).classList.add('active');
-
-            // Update Static Text
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                el.innerText = t(key);
-            });
-
-            // Re-render Dynamic Controls
-            renderControls();
-            
-            // Re-render Preview Grid Labels (Title only, no regen needed really, but easiest is update DOM)
-            // But generateImage overwrites grid. 
-            // We can just iterate grid and update labels if we stored original keys.
-            // For simplicity, let's just regenerate the text if possible or just let next gen fix it.
-            // Better: trigger a UI refresh without backend call if possible, but our data structure doesn't store results locally well enough.
-            // Let's just update the Action Buttons UI and Parts UI.
-            // The preview grid headers (Action Names) won't update until regeneration. That's acceptable.
+            // 1. Try exact match in options
+            if (TRANSLATIONS.options[key]) return TRANSLATIONS.options[key];
+            // 2. Try category specific map
+            if (TRANSLATIONS[category] && TRANSLATIONS[category][key]) return TRANSLATIONS[category][key];
+            // 3. Fallback: Just return key
+            return key;
         }
 
         // --- State Management ---
-        let currentConfig = { parts: {}, palette: {}, actions: ["idle", "walk", "attack", "run"], render_mode: "retro" };
+        // 默认参数：512px 输出, 8.0 密度 (超清渲染细节)
+        // [修改] 默认选中 4 个动作：待机、行走、奔跑、攻击
+        let currentConfig = { 
+            parts: {}, 
+            palette: {}, 
+            actions: ["idle", "walk", "run", "attack"], 
+            render_mode: "hibit",
+            density: "8.0",
+            output_size: "512" 
+        };
+        
         let partOptions = {};
         let userManuallySetBg = false;
 
@@ -878,15 +725,13 @@
         // --- Initialization ---
         async function init() {
             try {
-                // Setup Density Control UI
-                document.querySelectorAll('#density-control .segment-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        document.querySelectorAll('#density-control .segment-btn').forEach(b => b.classList.remove('active'));
-                        e.target.classList.add('active');
-                        document.getElementById('density-select').value = e.target.dataset.value;
-                        generateImage();
-                    });
-                });
+                // Initialize Controls based on default state
+                document.getElementById('density-select').value = "8.0";
+                document.getElementById('output-size-select').value = "512";
+                
+                // Bind segmented controls manually since we removed old binds
+                // setupSegmentedControl('size-control', 'output-size-select');
+                // setupSegmentedControl('density-control', 'density-select');
 
                 const optRes = await fetch('/options');
                 partOptions = await optRes.json();
@@ -897,34 +742,55 @@
                 currentConfig.palette = loadedConfig.palette || {};
                 currentConfig.parts = loadedConfig.parts || {};
                 
-                // Initialize Language based on system default or forced ZH
-                setLanguage('zh'); 
+                // Initial Render
+                renderControls(); 
                 generateImage();
             } catch (e) {
                 console.error(e);
-                showToast("Initialization failed", true);
+                showToast("初始化失败，请检查网络", true);
             }
+        }
+
+        function setupSegmentedControl(groupId, inputId) {
+            document.querySelectorAll(`#${groupId} .segment-btn`).forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll(`#${groupId} .segment-btn`).forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    document.getElementById(inputId).value = e.target.dataset.value;
+                    generateImage();
+                });
+            });
         }
 
         // --- Core Logic ---
         async function callRandomize(target = 'all') {
             const theme = document.getElementById('theme-select').value;
             const btn = document.querySelector(`.tool-btn[onclick="randomize${target === 'all' ? 'All' : (target.charAt(0).toUpperCase() + target.slice(1))}"]`);
-            if(btn) btn.style.transform = "rotate(360deg)"; // simple visual feedback
+            if(btn) btn.style.transform = "rotate(360deg)"; 
             
             try {
                 const res = await fetch(`/randomize?theme=${theme}`);
+                if (!res.ok) throw new Error("Randomize API Error");
                 const data = await res.json();
                 
                 if (target === 'all' || target === 'parts') currentConfig.parts = data.parts;
                 if (target === 'all' || target === 'palette') currentConfig.palette = data.palette;
                 
+                // Update Render Mode if theme changed significantly (only on global random)
+                if (target === 'all' && data.render_mode) {
+                    const modeSelect = document.getElementById('render-mode-select');
+                    modeSelect.value = data.render_mode;
+                    currentConfig.render_mode = data.render_mode;
+                }
+
+                // Force UI Refresh
                 renderControls();
                 generateImage();
                 
                 setTimeout(() => { if(btn) btn.style.transform = "none"; }, 500);
             } catch(e) {
                 console.error(e);
+                showToast("随机化失败", true);
             }
         }
 
@@ -941,21 +807,21 @@
 
         function resetBg() {
             userManuallySetBg = false;
-            generateImage(); // Triggers auto-contrast logic
+            generateImage(); 
         }
 
         function toggleActionSelection(actionName) {
             const idx = currentConfig.actions.indexOf(actionName);
             if (idx > -1) {
-                if (currentConfig.actions.length > 1) { // Prevent unselecting last one
+                if (currentConfig.actions.length > 1) { 
                     currentConfig.actions.splice(idx, 1);
                 }
             } else {
-                if (currentConfig.actions.length < 4) { // Limit max selection
+                if (currentConfig.actions.length < 4) { 
                     currentConfig.actions.push(actionName);
                 } else {
-                    showToast(t("ui.actions_hint"), true);
-                    return; // Stop update
+                    showToast("最多选择 4 个动作", true);
+                    return; 
                 }
             }
             updateActionUI();
@@ -981,7 +847,7 @@
                 const isSelected = currentConfig.actions.includes(act);
                 btn.className = isSelected ? 'segment-btn active' : 'segment-btn';
                 btn.style.border = '1px solid var(--border)';
-                btn.textContent = getLabel('options', act);
+                btn.textContent = getLabel('options', act); // 使用中文
                 btn.onclick = () => toggleActionSelection(act);
                 grid.appendChild(btn);
             });
@@ -997,6 +863,7 @@
             partsGrid.innerHTML = '';
             for (const [part, styles] of Object.entries(partOptions)) {
                 if(part === 'animations' || part === 'themes') continue;
+                if(!styles || styles.length === 0) continue; // 自动隐藏空选项
                 
                 const div = document.createElement('div');
                 div.className = 'input-group';
@@ -1016,8 +883,13 @@
                     select.appendChild(option);
                 });
                 
-                if (!currentConfig.parts[part]) currentConfig.parts[part] = styles[0];
-                select.value = currentConfig.parts[part];
+                // [Crucial Fix] Ensure the selected value exists in options
+                let val = currentConfig.parts[part];
+                if (!styles.includes(val)) {
+                    val = styles[0];
+                    currentConfig.parts[part] = val;
+                }
+                select.value = val;
                 
                 select.addEventListener('change', (e) => {
                     currentConfig.parts[part] = e.target.value;
@@ -1038,9 +910,6 @@
             const paletteGrid = document.getElementById('palette-grid');
             paletteGrid.innerHTML = '';
             
-            // Use keys from I18N structure to ensure order? 
-            // Or just iterate config? Let's use I18N keys as the source of truth for display order if needed.
-            // But we have backend config. Let's iterate fixed keys for consistency.
             const displayKeys = ["skin", "hair", "shirt", "pants", "boots", "eye_color", "metal"];
             
             for (const key of displayKeys) {
@@ -1086,14 +955,16 @@
             const stats = document.getElementById('stats-display');
             
             const density = document.getElementById('density-select').value;
+            const outputSize = document.getElementById('output-size-select').value;
             const mode = document.getElementById('render-mode-select').value;
             
             currentConfig.density = density;
+            currentConfig.output_size = outputSize;
             currentConfig.render_mode = mode;
 
             // Loading State
             const originalBtnContent = btn.innerHTML;
-            btn.innerHTML = `<div class="spinner"></div> ${t("ui.generating")}`;
+            btn.innerHTML = `<div class="spinner"></div> ${TRANSLATIONS.generating}`;
             btn.disabled = true;
             grid.style.opacity = 0.6;
 
@@ -1107,7 +978,7 @@
                 const data = await response.json();
                 
                 if (response.ok && data.results) {
-                    grid.innerHTML = ''; // Clear existing
+                    grid.innerHTML = ''; 
                     
                     // Auto Contrast Background Calculation
                     let autoBg = "#f0f2f5";
@@ -1116,25 +987,26 @@
                         if(p && p.skin) {
                             const luma = (p.skin[0] * 0.299 + p.skin[1] * 0.587 + p.skin[2] * 0.114);
                             autoBg = luma > 150 ? "#2d3436" : "#f0f2f5";
-                            // Sync picker
                             const picker = document.getElementById('stage-bg-picker');
                             if(picker) picker.value = (autoBg === "#f0f2f5" ? "#f0f2f5" : "#2d3436");
                         }
                     } else {
-                        // Keep current picker value
                          const picker = document.getElementById('stage-bg-picker');
                          if(picker) autoBg = picker.value;
                     }
 
                     // Render Grid Items
-                    Object.keys(data.results).forEach(act => {
+                    // [修改] 强制按照 currentConfig.actions 的顺序渲染，确保预览顺序固定
+                    currentConfig.actions.forEach(act => {
                         const item = data.results[act];
+                        if (!item) return; // 防御性检查
                         
                         const card = document.createElement('div');
                         card.className = 'preview-card-item';
                         
                         const header = document.createElement('div');
                         header.className = 'preview-header';
+                        // 使用中文 Action Name
                         header.innerHTML = `<span>${getLabel('options', act)}</span> <span style="font-weight:400; font-size:0.7rem">${item.size_kb}KB</span>`;
                         
                         const img = document.createElement('img');
@@ -1146,7 +1018,7 @@
                         dlBtn.className = 'mini-btn';
                         dlBtn.href = item.download_data;
                         dlBtn.download = item.filename;
-                        dlBtn.innerHTML = t("ui.download_png");
+                        dlBtn.innerHTML = TRANSLATIONS.download_png;
                         dlBtn.style.width = '100%';
                         dlBtn.style.textAlign = 'center';
                         
@@ -1159,15 +1031,15 @@
                     grid.style.opacity = 1;
 
                     if (data.stats) {
-                        stats.innerText = `Total Time: ${data.stats.duration}s | Total Size: ${data.stats.total_size_kb}KB`;
-                        showToast(t("ui.toast_batch"));
+                        stats.innerText = `生成耗时: ${data.stats.duration}s | 总大小: ${data.stats.total_size_kb}KB`;
+                        showToast(TRANSLATIONS.toast_batch);
                     }
                 } else {
-                    showToast("Error: " + (data.error || "Unknown"), true);
+                    showToast("错误: " + (data.error || "未知错误"), true);
                 }
             } catch (e) {
                 console.error(e);
-                showToast("Network Error", true);
+                showToast("网络连接错误", true);
             } finally {
                 btn.innerHTML = originalBtnContent;
                 btn.disabled = false;

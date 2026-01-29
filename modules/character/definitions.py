@@ -209,287 +209,336 @@ PART_TAGS = {
 PART_DEFINITIONS = {
     "back": {
         "none": [],
-        "cape": [("rect", (8, 16, 16, 14), "shirt")],
+        "cape": [
+            ("rect", (6, 16, 20, 16), "shirt"),  # Main cape body
+            ("rect", (8, 14, 16, 2), "shirt"),  # Shoulders
+            ("rect", (10, 32, 4, 3), "shirt"),  # Ragged bottom
+            ("rect", (18, 32, 4, 2), "shirt"),  # Ragged bottom
+        ],
         "wings": [
-            ("rect", (4, 14, 8, 4), "white"),
-            ("rect", (20, 14, 8, 4), "white"),
-            ("pixel", (5, 13), "white"),
-            ("pixel", (26, 13), "white"),
+            ("rect", (2, 12, 8, 4), "white"),  # L Wing top
+            ("rect", (4, 16, 6, 6), "white"),  # L Wing mid
+            ("rect", (6, 22, 2, 4), "white"),  # L Wing tip
+            ("rect", (22, 12, 8, 4), "white"),  # R Wing top
+            ("rect", (22, 16, 6, 6), "white"),  # R Wing mid
+            ("rect", (24, 22, 2, 4), "white"),  # R Wing tip
         ],
         "backpack": [
-            ("rect", (8, 16, 16, 10), "wood"),
-            ("rect", (10, 18, 12, 6), "pants"),
+            ("rect", (8, 14, 16, 12), "wood"),  # Main pack
+            ("rect", (9, 15, 14, 10), "pants"),  # Inner fabric
+            ("rect", (10, 20, 12, 4), "wood"),  # Pocket
+            ("rect", (6, 16, 2, 8), "wood"),  # Strap L
+            ("rect", (24, 16, 2, 8), "wood"),  # Strap R
         ],
         "jetpack": [
-            ("rect", (10, 16, 4, 10), "metal"),
-            ("rect", (18, 16, 4, 10), "metal"),
-            ("pixel", (11, 26), "highlight"),
-            ("pixel", (19, 26), "highlight"),
+            ("rect", (10, 14, 5, 14), "metal"),  # L Thruster
+            ("rect", (17, 14, 5, 14), "metal"),  # R Thruster
+            ("rect", (11, 28, 3, 2), "neon_blue"),  # Flame L
+            ("rect", (18, 28, 3, 2), "neon_blue"),  # Flame R
+            ("rect", (12, 16, 8, 4), "metal"),  # Connector
         ],
         "flying_swords": [
-            ("rect", (6, 10, 2, 10), "metal"),
-            ("rect", (24, 10, 2, 10), "metal"),
-            ("rect", (4, 12, 6, 2), "metal"),
-            ("rect", (22, 12, 6, 2), "metal"),
+            ("rect", (6, 8, 2, 14), "metal"),  # Sword 1
+            ("rect", (24, 8, 2, 14), "metal"),  # Sword 2
+            ("rect", (4, 12, 6, 1), "metal"),  # Guard 1
+            ("rect", (22, 12, 6, 1), "metal"),  # Guard 2
+            ("pixel", (6, 23), "highlight"),  # Tip sparkle
+            ("pixel", (24, 23), "highlight"),
         ],
         "coffin": [
-            ("rect", (10, 12, 12, 18), "wood"),
-            ("rect", (14, 16, 4, 10), "black"),
-        ],  # Cross shape
+            ("rect", (10, 10, 12, 22), "wood"),  # Box
+            ("rect", (12, 14, 8, 14), "black"),  # Cross inset
+            ("rect", (14, 12, 4, 18), "wood"),  # Cross vertical
+            ("rect", (11, 16, 10, 4), "wood"),  # Cross horizontal
+        ],
     },
     "head": {
-        "human": [("rect", (10, 4, 12, 12), "skin")],
+        "human": [
+            ("rect", (9, 4, 14, 13), "skin"),  # Face Base
+            # Eyes (Detailed)
+            ("rect", (10, 9, 3, 2), "white"),  # L Sclera
+            ("pixel", (11, 9), "eye_color"),  # L Pupil
+            ("rect", (19, 9, 3, 2), "white"),  # R Sclera
+            ("pixel", (20, 9), "eye_color"),  # R Pupil
+            # Brows
+            ("rect", (10, 7, 3, 1), "hair"),
+            ("rect", (19, 7, 3, 1), "hair"),
+            # Nose
+            ("pixel", (15, 11), "outline"),  # Small nose shadow
+            # Mouth
+            ("rect", (14, 14, 4, 1), "outline"),
+            # Ears
+            ("rect", (8, 9, 1, 3), "skin"),
+            ("rect", (23, 9, 1, 3), "skin"),
+        ],
         "elf": [
-            ("rect", (10, 4, 12, 12), "skin"),
+            ("rect", (10, 4, 12, 13), "skin"),
+            ("pixel", (11, 9), "eye_color"),
+            ("pixel", (20, 9), "eye_color"),
+            ("rect", (14, 14, 4, 1), "outline"),
+            # Pointy Ears
             ("pixel", (9, 8), "skin"),
+            ("pixel", (8, 7), "skin"),
             ("pixel", (22, 8), "skin"),
+            ("pixel", (23, 7), "skin"),
         ],
         "orc": [
-            ("rect", (9, 4, 14, 12), "skin"),
-            ("rect", (11, 12, 2, 3), "tooth"),
-            ("rect", (19, 12, 2, 3), "tooth"),
+            ("rect", (9, 4, 14, 13), "skin"),  # Green skin
+            # Angry Eyes
+            ("rect", (10, 9, 3, 1), "white"),
+            ("pixel", (11, 9), "black"),
+            ("rect", (19, 9, 3, 1), "white"),
+            ("pixel", (20, 9), "black"),
+            ("rect", (10, 8, 4, 1), "black"),  # Brow
+            ("rect", (18, 8, 4, 1), "black"),
+            # Tusks
+            ("rect", (11, 13, 1, 3), "tooth"),
+            ("rect", (20, 13, 1, 3), "tooth"),
+            ("rect", (13, 13, 6, 1), "black"),  # Mouth between tusks
         ],
-        "dwarf": [("rect", (10, 4, 12, 12), "skin"), ("rect", (10, 12, 12, 6), "hair")],
+        "dwarf": [
+            ("rect", (9, 4, 14, 13), "skin"),
+            ("rect", (10, 8, 4, 2), "white"),  # Big eyes
+            ("pixel", (12, 8), "black"),
+            ("rect", (18, 8, 4, 2), "white"),
+            ("pixel", (19, 8), "black"),
+            # Big Beard
+            ("rect", (9, 11, 14, 8), "hair"),
+            ("rect", (11, 10, 10, 2), "hair"),  # Mustache
+        ],
         "skeleton": [
-            ("rect", (11, 5, 10, 10), "skin"),
-            ("rect", (11, 12, 10, 3), "black"),
-            ("rect", (13, 12, 1, 3), "skin"),
-            ("rect", (15, 12, 1, 3), "skin"),
-            ("rect", (17, 12, 1, 3), "skin"),
+            ("rect", (10, 5, 12, 11), "skin"),  # Bone color
+            # Hollow Eyes
+            ("rect", (11, 8, 3, 3), "black"),
+            ("rect", (18, 8, 3, 3), "black"),
+            ("pixel", (12, 8), "white"),  # Eye glint
+            # Nose hole
+            ("rect", (15, 11, 2, 2), "black"),
+            # Teeth
+            ("rect", (11, 14, 10, 2), "skin"),
+            ("rect", (11, 14, 1, 2), "outline"),
+            ("rect", (13, 14, 1, 2), "outline"),
+            ("rect", (15, 14, 1, 2), "outline"),
+            ("rect", (17, 14, 1, 2), "outline"),
+            ("rect", (19, 14, 1, 2), "outline"),
         ],
         "robot": [
-            ("rect", (10, 4, 12, 12), "metal"),
-            ("rect", (9, 9, 2, 2), "highlight"),
-            ("rect", (21, 9, 2, 2), "highlight"),
+            ("rect", (9, 4, 14, 13), "metal"),
+            # Visor
+            ("rect", (10, 8, 12, 3), "black"),
+            ("rect", (11, 9, 10, 1), "neon_blue"),  # Glowing line
+            # Vents
+            ("rect", (11, 13, 2, 2), "outline"),
+            ("rect", (14, 13, 2, 2), "outline"),
+            ("rect", (17, 13, 2, 2), "outline"),
+            # Antenna
+            ("rect", (9, 2, 1, 4), "metal"),
+            ("pixel", (9, 1), "neon_green"),
         ],
-        "pumpkin": [("rect", (9, 4, 14, 12), "hair"), ("rect", (15, 2, 2, 2), "wood")],
         "sage_beard": [
             ("rect", (10, 4, 12, 12), "skin"),
-            ("rect", (12, 14, 8, 6), "white"),
-            ("rect", (13, 18, 6, 4), "white"),
+            # Wise Eyes
+            ("rect", (11, 8, 2, 1), "black"),
+            ("rect", (19, 8, 2, 1), "black"),
+            # Long Beard
+            ("rect", (11, 11, 10, 10), "white"),
+            ("rect", (12, 21, 8, 3), "white"),
+            # Eyebrows
+            ("rect", (10, 6, 4, 2), "white"),
+            ("rect", (18, 6, 4, 2), "white"),
         ],
         "cyborg_eye": [
-            ("rect", (10, 4, 12, 12), "skin"),
-            ("rect", (11, 8, 4, 4), "metal"),
+            ("rect", (9, 4, 14, 13), "skin"),
+            ("rect", (19, 9, 3, 2), "white"),  # R Normal Eye
+            ("pixel", (20, 9), "black"),
+            # Cyborg L Eye
+            ("rect", (10, 7, 5, 6), "metal"),
             ("pixel", (12, 9), "neon_pink"),
+            # Mouth
+            ("rect", (14, 14, 4, 1), "outline"),
         ],
-        "zombie": [
-            ("rect", (10, 4, 12, 12), "zombie_skin"),
-            ("rect", (11, 6, 3, 3), "blood"),
-            ("pixel", (20, 10), "white"),
-        ],  # Missing eye
-        "gas_mask": [
-            ("rect", (10, 4, 12, 12), "skin"),
-            ("rect", (11, 10, 10, 6), "leather"),
-            ("rect", (13, 12, 2, 2), "brass"),
-            ("rect", (17, 12, 2, 2), "brass"),
-        ],
-        "oni": [
-            ("rect", (9, 4, 14, 12), "blood"),
-            ("rect", (10, 2, 2, 3), "tooth"),
-            ("rect", (20, 2, 2, 3), "tooth"),
-        ],  # Red skin, horns
     },
     "hair": {
-        "bald": [],
+        "bald": [
+            ("pixel", (8, 9), "skin"),  # Just ears
+            ("pixel", (23, 9), "skin"),
+        ],
         "short": [
-            ("rect", (10, 2, 12, 4), "hair"),
-            ("rect", (9, 4, 1, 4), "hair"),
-            ("rect", (22, 4, 1, 4), "hair"),
+            ("rect", (9, 2, 14, 6), "hair"),  # Top
+            ("rect", (8, 6, 2, 4), "hair"),  # Sides
+            ("rect", (22, 6, 2, 4), "hair"),
+            ("rect", (14, 2, 4, 2), "highlight"),  # Shine
         ],
         "long": [
-            ("rect", (10, 2, 12, 4), "hair"),
-            ("rect", (8, 4, 2, 10), "hair"),
-            ("rect", (22, 4, 2, 10), "hair"),
+            ("rect", (9, 2, 14, 6), "hair"),
+            ("rect", (7, 6, 3, 12), "hair"),  # Long sides
+            ("rect", (22, 6, 3, 12), "hair"),
+            ("rect", (10, 3, 12, 2), "highlight"),
         ],
-        "mohawk": [("rect", (14, 0, 4, 6), "hair")],
-        "ponytail": [("rect", (10, 2, 12, 4), "hair"), ("rect", (6, 4, 4, 4), "hair")],
-        "afro": [("rect", (8, 0, 16, 14), "hair")],
+        "mohawk": [
+            ("rect", (14, 0, 4, 10), "hair"),  # Tall strip
+            ("rect", (10, 4, 12, 2), "skin"),  # Shaved head base
+        ],
+        "ponytail": [
+            ("rect", (9, 2, 14, 6), "hair"),
+            ("rect", (22, 5, 2, 2), "hair"),  # Tie
+            ("rect", (24, 6, 4, 8), "hair"),  # Tail
+        ],
+        "afro": [
+            ("rect", (7, 0, 18, 14), "hair"),  # Big round
+            (
+                "pixel",
+                (8, 1),
+                "bg",
+            ),  # Rounding corners (negative space logic via no-draw, but here we just draw rect)
+            # Actually we can't erase. So we just draw shape.
+            ("rect", (9, 2, 4, 4), "highlight"),  # Curls texture
+            ("rect", (18, 4, 4, 4), "highlight"),
+        ],
         "wizard_hat": [
-            ("rect", (8, 6, 16, 2), "shirt"),
-            ("polygon", [(11, 6), (16, -4), (21, 6)], "shirt"),
-            ("rect", (11, 0, 10, 6), "shirt"),
-            ("rect", (13, -4, 6, 4), "shirt"),
+            ("rect", (6, 6, 20, 2), "shirt"),  # Brim
+            ("rect", (9, 2, 14, 4), "shirt"),  # Base
+            ("rect", (11, -2, 10, 4), "shirt"),  # Mid
+            ("rect", (13, -5, 6, 3), "shirt"),  # Tip
+            ("rect", (9, 5, 14, 1), "outline"),  # Band
         ],
-        "hood": [("rect", (9, 3, 14, 14), "shirt")],
-        "bandana": [("rect", (9, 5, 14, 3), "shirt"), ("pixel", (8, 5), "shirt")],
-        "topknot": [
-            ("rect", (10, 2, 12, 4), "hair"),
-            ("rect", (14, -2, 4, 4), "hair"),
-            ("rect", (13, -1, 6, 1), "wood"),
-        ],
-        "long_flowy": [
-            ("rect", (10, 2, 12, 4), "hair"),
-            ("rect", (8, 4, 2, 14), "hair"),
-            ("rect", (22, 4, 2, 14), "hair"),
-            ("rect", (10, -2, 12, 2), "hair"),
+        "hood": [
+            ("rect", (8, 3, 16, 14), "shirt"),  # Main hood
+            ("rect", (10, 5, 12, 10), "black"),  # Face shadow
+            # (Face will be drawn over this, so we need hood to be 'hair' layer but visually covering?)
+            # Hair draws AFTER head. So this works as a cowl.
         ],
         "helmet": [
-            ("rect", (9, 3, 14, 14), "metal"),
-            ("rect", (11, 8, 10, 3), "black"),
+            ("rect", (8, 3, 16, 14), "metal"),
+            ("rect", (14, 3, 4, 14), "highlight"),  # Crest shine
+            ("rect", (10, 8, 12, 4), "black"),  # Visor slit
         ],
-        "mohawk_neon": [("rect", (14, 0, 4, 6), "neon_pink")],
-        "top_hat": [
-            ("rect", (10, 2, 12, 2), "black"),
-            ("rect", (11, -4, 10, 6), "black"),
-            ("rect", (11, 1, 10, 1), "shirt"),
-        ],  # Band
-        "brain_exposed": [("rect", (11, 4, 10, 4), "blood")],
-    },
-    "eyes": {
-        "normal": [("pixel", (12, 10), "eye_color"), ("pixel", (19, 10), "eye_color")],
-        "sunglasses": [("rect", (11, 9, 10, 3), "black")],
-        "cyclops": [("rect", (14, 9, 4, 4), "eye_color"), ("pixel", (15, 10), "black")],
-        "visipatch": [
-            ("rect", (11, 9, 10, 2), "metal"),
-            ("pixel", (15, 9), "highlight"),
-        ],
-        "glowing": [
-            ("rect", (12, 10, 2, 2), "highlight"),
-            ("rect", (18, 10, 2, 2), "highlight"),
-        ],
-        "tired": [
-            ("pixel", (12, 10), "eye_color"),
-            ("pixel", (19, 10), "eye_color"),
-            ("rect", (11, 11, 3, 1), "black"),
-            ("rect", (18, 11, 3, 1), "black"),
-        ],
-        "goggles": [
-            ("rect", (10, 9, 4, 4), "brass"),
-            ("rect", (18, 9, 4, 4), "brass"),
-            ("rect", (11, 10, 2, 2), "neon_blue"),
-            ("rect", (19, 10, 2, 2), "neon_blue"),
+        "topknot": [
+            ("rect", (9, 3, 14, 5), "hair"),
+            ("rect", (14, 0, 4, 3), "hair"),  # Bun
+            ("rect", (13, 1, 6, 1), "wood"),  # Stick
         ],
     },
     "body": {
-        "shirt": [("rect", (12, 16, 8, 8), "shirt")],
-        "armor": [
-            ("rect", (11, 16, 10, 8), "metal"),
-            ("rect", (14, 18, 4, 4), "highlight"),
-        ],
-        "robe": [("rect", (11, 16, 10, 14), "shirt")],
-        "jacket": [
+        "shirt": [
             ("rect", (11, 16, 10, 10), "shirt"),
-            ("rect", (15, 16, 2, 10), "white"),
+            ("rect", (11, 16, 10, 1), "highlight"),  # Collar
+            ("rect", (15, 17, 2, 9), "outline"),  # Placket
+            ("pixel", (16, 18), "white"),  # Button
+            ("pixel", (16, 20), "white"),
+            ("pixel", (16, 22), "white"),
         ],
-        "ribs": [
-            ("rect", (15, 16, 2, 8), "skin"),
-            ("rect", (13, 17, 6, 1), "skin"),
-            ("rect", (13, 19, 6, 1), "skin"),
-            ("rect", (13, 21, 6, 1), "skin"),
+        "armor": [
+            ("rect", (10, 16, 12, 10), "metal"),  # Plate
+            ("rect", (9, 16, 3, 4), "metal"),  # L Pauldron
+            ("rect", (20, 16, 3, 4), "metal"),  # R Pauldron
+            ("rect", (13, 19, 6, 4), "highlight"),  # Chest shine
+            ("rect", (12, 24, 8, 2), "leather"),  # Belt
+            ("pixel", (15, 24), "gold"),  # Buckle
         ],
-        "suit": [
-            ("rect", (12, 16, 8, 8), "black"),
-            ("rect", (15, 16, 2, 4), "white"),
-            ("rect", (15, 17, 2, 4), "shirt"),
+        "robe": [
+            ("rect", (10, 16, 12, 14), "shirt"),
+            ("rect", (13, 16, 6, 14), "white"),  # Inner
+            ("rect", (10, 16, 12, 2), "highlight"),  # Collar/Scarf
+            ("rect", (10, 24, 12, 2), "outline"),  # Sash
         ],
-        "overalls": [
-            ("rect", (12, 16, 8, 8), "pants"),
-            ("rect", (13, 18, 6, 4), "shirt"),
+        "jacket": [
+            ("rect", (10, 16, 12, 10), "shirt"),
+            ("rect", (14, 16, 4, 10), "white"),  # T-shirt under
+            ("rect", (10, 16, 3, 8), "highlight"),  # Lapel L
+            ("rect", (19, 16, 3, 8), "highlight"),  # Lapel R
+            ("rect", (10, 24, 12, 2), "black"),  # Bottom hem
         ],
         "hanfu_scholar": [
-            ("rect", (11, 16, 10, 14), "shirt"),
-            ("rect", (11, 20, 10, 2), "black"),
-            ("rect", (10, 16, 12, 14), "shirt"),
-        ],
-        "hanfu_warrior": [
-            ("rect", (11, 16, 10, 12), "metal"),
-            ("rect", (13, 18, 6, 6), "shirt"),
+            ("rect", (10, 16, 12, 14), "shirt"),  # Main Robe
+            ("rect", (10, 16, 12, 14), "shirt"),  # Cross collar L
+            ("rect", (10, 16, 4, 8), "highlight"),  # Collar trim
+            ("rect", (11, 22, 10, 4), "black"),  # Wide belt
+            ("rect", (14, 22, 4, 4), "jade"),  # Jade ornament
         ],
         "mech_suit": [
-            ("rect", (10, 15, 12, 10), "metal"),
-            ("rect", (14, 17, 4, 4), "neon_blue"),
-            ("rect", (9, 15, 2, 6), "metal"),
-            ("rect", (21, 15, 2, 6), "metal"),
+            ("rect", (9, 15, 14, 12), "metal"),  # Bulky chest
+            ("rect", (13, 18, 6, 6), "neon_blue"),  # Core Reactor
+            ("rect", (8, 15, 3, 6), "metal"),  # Shoulder L
+            ("rect", (21, 15, 3, 6), "metal"),  # Shoulder R
+            ("rect", (10, 25, 12, 2), "highlight"),  # Waist hydraulic
         ],
-        "jacket_neon": [
-            ("rect", (11, 16, 10, 10), "black"),
-            ("rect", (15, 16, 2, 10), "neon_pink"),
-            ("rect", (11, 16, 1, 10), "neon_pink"),
-            ("rect", (20, 16, 1, 10), "neon_pink"),
+    },
+    # [Fix] Removed 'arms' key as it is procedural and causes UI issues
+    "legs": {
+        "pants": [
+            ("rect", (0, 0, 4, 8), "pants"),  # L Leg
+            ("rect", (0, 7, 4, 1), "outline"),  # Cuff
         ],
-        "coat_brass": [
-            ("rect", (11, 16, 10, 12), "leather"),
-            ("rect", (13, 16, 2, 12), "brass"),
-            ("rect", (17, 16, 2, 12), "brass"),
-        ],
-        "ribs_gore": [
-            ("rect", (15, 16, 2, 8), "skin"),
-            ("rect", (13, 17, 6, 1), "skin"),
-            ("rect", (13, 19, 6, 1), "skin"),
-            ("rect", (12, 16, 8, 8), "blood"),
-        ],  # Bloody ribs
+    },
+    "arms": {
+        # Procedural arms usually, but we can define props here if needed.
+        # This dict key is mostly unused by generator logic which draws rects procedurally.
+        # But we will leave it for compatibility.
     },
     "legs": {
-        "pants": [("rect", (0, 0, 3, 6), "pants")],
-        "skirt": [("rect", (-1, 0, 5, 4), "pants")],
-        "shorts": [("rect", (0, 0, 3, 3), "pants"), ("rect", (0, 3, 3, 3), "skin")],
-        "peg_leg": [("rect", (1, 0, 1, 6), "wood")],
+        "pants": [
+            ("rect", (0, 0, 4, 8), "pants"),  # L Leg
+            ("rect", (0, 7, 4, 1), "outline"),  # Cuff
+        ],
+        "shorts": [
+            ("rect", (0, 0, 4, 4), "pants"),  # Shorts
+            ("rect", (0, 4, 4, 4), "skin"),  # Bare leg
+            ("rect", (0, 7, 4, 1), "boots"),  # Shoes
+        ],
         "boots_high": [
-            ("rect", (0, 0, 3, 3), "pants"),
-            ("rect", (-1, 3, 5, 3), "boots"),
+            ("rect", (0, 0, 4, 3), "pants"),  # Thigh
+            ("rect", (-1, 3, 6, 5), "boots"),  # Big Boot
+            ("rect", (-1, 3, 6, 1), "highlight"),  # Boot cuff
+        ],
+        "skirt": [
+            ("rect", (-1, 0, 6, 5), "pants"),  # Skirt body
+            ("rect", (-1, 5, 6, 1), "highlight"),  # Hem
+            ("rect", (1, 5, 2, 3), "skin"),  # Legs underneath
         ],
         "robot_legs": [
-            ("rect", (0, 0, 3, 6), "metal"),
-            ("rect", (1, 2, 1, 1), "highlight"),
+            ("rect", (1, 0, 2, 8), "metal"),  # Piston
+            ("rect", (0, 2, 4, 2), "highlight"),  # Joint
+            ("rect", (-1, 6, 6, 2), "metal"),  # Foot
         ],
     },
     "held": {
-        "none": [],
         "sword": [
-            ("rect", (0, -4, 2, 10), "metal"),
-            ("rect", (-1, 4, 4, 1), "wood"),
-            ("rect", (0, 5, 2, 3), "wood"),
+            ("rect", (0, -8, 2, 16), "metal"),  # Blade
+            ("rect", (-2, 8, 6, 1), "gold"),  # Guard
+            ("rect", (-1, 9, 4, 3), "wood"),  # Hilt
+            ("pixel", (0, 12), "gold"),  # Pommel
+            ("rect", (0, -8, 1, 16), "highlight"),  # Blade Shine
         ],
         "staff": [
-            ("rect", (0, -8, 2, 20), "wood"),
-            ("rect", (-1, -10, 4, 4), "highlight"),
+            ("rect", (0, -12, 2, 26), "wood"),  # Pole
+            ("rect", (-2, -14, 6, 4), "gold"),  # Headpiece
+            ("rect", (-1, -13, 4, 2), "neon_blue"),  # Gem
         ],
         "axe": [
-            ("rect", (0, -4, 2, 14), "wood"),
-            ("rect", (2, -4, 4, 6), "metal"),
-            ("rect", (-2, -4, 4, 6), "metal"),
+            ("rect", (0, -6, 2, 18), "wood"),  # Handle
+            ("rect", (2, -6, 6, 8), "metal"),  # Blade R
+            ("rect", (-4, -6, 6, 8), "metal"),  # Blade L
+            ("rect", (-4, -2, 12, 1), "highlight"),  # Edge
         ],
         "shield": [
-            ("rect", (-2, -4, 8, 10), "metal"),
-            ("rect", (0, -2, 4, 6), "shirt"),
-        ],
-        "jian": [
-            ("rect", (0, -6, 2, 12), "metal"),
-            ("rect", (-2, 6, 6, 1), "wood"),
-            ("rect", (0, 7, 2, 3), "wood"),
-            ("pixel", (0, 10), "highlight"),
-        ],
-        "fan": [
-            ("polygon", [(0, 0), (-4, -4), (4, -4)], "white"),
-            ("rect", (0, 0, 2, 4), "wood"),
-        ],
-        "gourd": [
-            ("rect", (-2, -2, 6, 6), "wood"),
-            ("rect", (0, -4, 2, 2), "wood"),
-            ("rect", (-1, -6, 4, 2), "wood"),
+            ("rect", (-4, -6, 10, 14), "metal"),  # Main plate
+            ("rect", (-2, -4, 6, 10), "shirt"),  # Heraldry color
+            ("rect", (-4, -6, 10, 14), "outline", "stroke"),  # Rim (simulated)
+            ("rect", (-4, -6, 10, 1), "gold"),  # Rim Top
+            ("rect", (-4, 7, 10, 1), "gold"),  # Rim Bottom
         ],
         "laser_gun": [
-            ("rect", (0, 0, 8, 2), "metal"),
-            ("rect", (0, 2, 2, 4), "black"),
-            ("rect", (2, -1, 4, 1), "neon_green"),
+            ("rect", (0, 0, 10, 3), "metal"),  # Barrel
+            ("rect", (-2, 2, 4, 5), "black"),  # Grip
+            ("rect", (2, -1, 6, 1), "neon_green"),  # Energy rail
+            ("rect", (8, 0, 2, 4), "metal"),  # Muzzle
         ],
-        "katana_laser": [
-            ("rect", (0, -6, 2, 14), "neon_pink"),
-            ("rect", (-1, 6, 4, 1), "black"),
-            ("rect", (0, 7, 2, 3), "black"),
-        ],
-        "wrench": [
-            ("rect", (0, -2, 2, 10), "metal"),
-            ("rect", (-1, -4, 4, 2), "metal"),
-        ],
-        "chainsaw": [
-            ("rect", (0, 0, 10, 4), "neon_pink"),
-            ("rect", (0, 2, 4, 4), "black"),
-        ],  # Simplified
-        "butcher_knife": [
-            ("rect", (0, -4, 4, 10), "metal"),
-            ("rect", (0, 6, 2, 4), "wood"),
+        "jian": [
+            ("rect", (0, -10, 2, 20), "metal"),  # Blade
+            ("rect", (-3, 10, 8, 1), "gold"),  # Guard
+            ("rect", (-1, 11, 4, 4), "wood"),  # Hilt
+            ("rect", (0, 15, 2, 4), "highlight"),  # Tassel
         ],
     },
 }
@@ -503,49 +552,70 @@ THEME_MAPPINGS = {
     "horror": [],
 }
 
-# Animation defs remain the same, just copied over to ensure file integrity if overwriting
+# [优化] 重写动画定义，大幅增强动作差异性
 ANIMATION_DEFINITIONS = {
-    "idle": [{"bob": 0, "leg_f": 0, "arm_f": 0}, {"bob": 1, "leg_f": 0, "arm_f": 0}],
+    "idle": [
+        # 呼吸感：轻微上下浮动，频率慢
+        {"bob": 0, "leg_f": 0, "arm_f": 0},
+        {"bob": 0, "leg_f": 0, "arm_f": 0},
+        {"bob": 1, "leg_f": 0, "arm_f": 0},
+        {"bob": 1, "leg_f": 0, "arm_f": 0},
+    ],
     "walk": [
-        {"bob": 0, "leg_f": 0, "arm_f": 0},
-        {"bob": 1, "leg_f": -1, "arm_f": 1},
-        {"bob": 0, "leg_f": 0, "arm_f": 0},
-        {"bob": 1, "leg_f": 1, "arm_f": -1},
+        # 走路：稳定的节奏，小幅度摆臂
+        {"bob": 0, "leg_f": 0, "arm_f": 0, "offset_x": 0},
+        {"bob": -1, "leg_f": -1, "arm_f": 1, "offset_x": 0},  # 抬脚
+        {"bob": 0, "leg_f": 0, "arm_f": 0, "offset_x": 0},
+        {"bob": -1, "leg_f": 1, "arm_f": -1, "offset_x": 0},  # 另一只脚
     ],
     "run": [
-        {"bob": 0, "leg_f": 0, "arm_f": 0},
-        {"bob": 2, "leg_f": -2, "arm_f": 2},
-        {"bob": 0, "leg_f": 0, "arm_f": 0},
-        {"bob": 2, "leg_f": 2, "arm_f": 2},
+        # 跑步：大幅度跳跃感(bob -3)，身体前倾(通过offset_x模拟冲刺感)
+        # 帧数减少以增加速度感
+        {"bob": -1, "leg_f": 1, "arm_f": -1, "offset_x": 2},  # 冲刺前倾
+        {"bob": -3, "leg_f": -2, "arm_f": 2, "offset_x": 0},  # 腾空，双腿大迈，手举高
+        {"bob": -1, "leg_f": -1, "arm_f": 1, "offset_x": 2},  # 落地前倾
+        {"bob": -3, "leg_f": 2, "arm_f": 2, "offset_x": 0},  # 腾空
     ],
     "attack": [
-        {"bob": 0, "leg_f": 1, "arm_f": -1},
-        {"bob": 0, "leg_f": 2, "arm_f": 2},
-        {"bob": 1, "leg_f": 2, "arm_f": 2},
-        {"bob": 0, "leg_f": 1, "arm_f": 0},
+        # 攻击：蓄力(后退) -> 突刺(大幅前进) -> 恢复
+        {"bob": 0, "leg_f": -1, "arm_f": 0, "offset_x": -2},  # 蓄力：向后退，手收回
+        {"bob": 1, "leg_f": -1, "arm_f": 0, "offset_x": -4},  # 蓄力深蹲
+        {
+            "bob": -1,
+            "leg_f": 2,
+            "arm_f": 2,
+            "offset_x": 8,
+        },  # 突刺：大幅向前，手举起(挥刀)
+        {"bob": 0, "leg_f": 1, "arm_f": 2, "offset_x": 4},  # 惯性
+        {"bob": 0, "leg_f": 0, "arm_f": 1, "offset_x": 0},  # 恢复站姿
     ],
     "jump": [
-        {"bob": 1, "leg_f": -1, "arm_f": -1},
-        {"bob": -4, "leg_f": 0, "arm_f": 2},
-        {"bob": -2, "leg_f": 0, "arm_f": 2},
-        {"bob": 0, "leg_f": -1, "arm_f": 0},
+        # 跳跃：下蹲蓄力 -> 升空 -> 滞空 -> 落地
+        {"bob": 2, "leg_f": 0, "arm_f": 0},  # 蹲
+        {"bob": -6, "leg_f": -2, "arm_f": 2},  # 起跳，腿缩起
+        {"bob": -8, "leg_f": -2, "arm_f": 2},  # 最高点
+        {"bob": -4, "leg_f": -1, "arm_f": 1},  # 下落
+        {"bob": 1, "leg_f": 0, "arm_f": 0},  # 缓冲
     ],
     "hurt": [
+        # 受击：剧烈震动，向后击退
         {"bob": 0, "leg_f": 0, "arm_f": 0},
-        {"bob": 0, "leg_f": -1, "arm_f": 2, "offset_x": -2},
-        {"bob": 0, "leg_f": -1, "arm_f": 2, "offset_x": -1},
-        {"bob": 0, "leg_f": 0, "arm_f": 0},
+        {"bob": -1, "leg_f": -1, "arm_f": 2, "offset_x": -4},  # 被打飞
+        {"bob": 1, "leg_f": -1, "arm_f": 2, "offset_x": -6},  # 继续后退
+        {"bob": 0, "leg_f": 0, "arm_f": 0, "offset_x": -3},  # 落地滑行
+        {"bob": 0, "leg_f": 0, "arm_f": 0, "offset_x": 0},
     ],
     "cheer": [
         {"bob": 0, "leg_f": 0, "arm_f": 0},
+        {"bob": -2, "leg_f": 0, "arm_f": 2},  # 跳起欢呼
+        {"bob": 0, "leg_f": 0, "arm_f": 0},
         {"bob": -2, "leg_f": 0, "arm_f": 2},
-        {"bob": 0, "leg_f": 0, "arm_f": 2},
-        {"bob": -1, "leg_f": 0, "arm_f": 2},
     ],
     "die": [
         {"bob": 0, "leg_f": 0, "arm_f": 0},
-        {"bob": 4, "leg_f": -1, "arm_f": -1},
-        {"bob": 8, "leg_f": -2, "arm_f": 0},
-        {"bob": 8, "leg_f": -2, "arm_f": 0},
+        {"bob": -2, "leg_f": 0, "arm_f": 2, "offset_x": -2},  # 痛苦
+        {"bob": 4, "leg_f": -1, "arm_f": -1, "offset_x": -4},  # 倒下中
+        {"bob": 10, "leg_f": -2, "arm_f": 0, "offset_x": -6},  # 躺平 (bob正值是向下)
+        {"bob": 10, "leg_f": -2, "arm_f": 0, "offset_x": -6},  # 尸体帧
     ],
 }
