@@ -510,20 +510,39 @@
                 </div>
             </div>
 
-            <!-- Render Settings -->
-            <div class="control-section">
+            <!-- Render Settings (Hidden as per requirement) -->
+            <div class="control-section" style="display: none;">
                 <div class="section-header">
-                    <span>渲染风格</span>
+                    <span>画质设置</span>
                 </div>
                 
-                <!-- 隐藏的默认参数：512px + 8.0(超清) -->
-                <input type="hidden" id="output-size-select" value="512">
-                <input type="hidden" id="density-select" value="8.0">
+                <div style="margin-bottom: 15px;">
+                    <div class="label" style="margin-bottom: 8px;">输出尺寸 (像素)</div>
+                    <div class="segmented-control" id="size-control">
+                        <button class="segment-btn" data-value="64">64</button>
+                        <button class="segment-btn" data-value="128">128</button>
+                        <button class="segment-btn" data-value="256">256</button>
+                        <button class="segment-btn active" data-value="512">512</button>
+                    </div>
+                    <!-- 默认设为 512 -->
+                    <input type="hidden" id="output-size-select" value="512">
+                </div>
 
+                <div style="margin-bottom: 15px;">
+                    <div class="label" style="margin-bottom: 8px;">像素密度 (精细度)</div>
+                    <div class="segmented-control" id="density-control">
+                        <button class="segment-btn" data-value="0.5">低</button>
+                        <button class="segment-btn" data-value="1.0">标准</button>
+                        <button class="segment-btn" data-value="4.0">高清</button>
+                        <button class="segment-btn active" data-value="8.0">超清</button>
+                    </div>
+                    <input type="hidden" id="density-select" value="8.0">
+                </div>
+                
                 <div>
                     <div class="select-wrapper">
                         <select id="render-mode-select" onchange="generateImage()">
-                            <option value="hibit">✨ 现代高位 (推荐)</option>
+                            <option value="hibit" selected>✨ 现代高位 (推荐)</option>
                             <option value="retro">👾 标准像素</option>
                             <option value="premium">💎 精致 2.5D</option>
                             <option value="hd">📐 矢量高清</option>
