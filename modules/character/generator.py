@@ -19,13 +19,19 @@ class CharacterComposer:
                 print(f"Error loading config: {e}")
                 config = {}
 
-        self.width = config.get("canvas", {}).get("width", 64)
-        self.height = config.get("canvas", {}).get("height", 64)
+        # [Expanded Canvas] Increase size to prevent clipping during animations
+        # User config might say 64, but we force internal canvas larger
+        # Logic: Character is designed in 64x64 grid.
+        # We need a buffer. Let's use 128x128 internal canvas.
+        self.width = 128
+        self.height = 128
 
-        # 居中偏移量
-        design_w, design_h = 32, 32
+        # 居中偏移量 (Center the 64x64 design in the 128x128 canvas)
+        design_w, design_h = 64, 64
         self.base_offset_x = (self.width - design_w) // 2
-        self.base_offset_y = (self.height - design_h) // 2
+        self.base_offset_y = (
+            self.height - design_h
+        ) // 2 + 16  # Shift down slightly for headroom
 
         self.selections = config.get("parts", {})
         self.palette = defs.DEFAULT_PALETTE.copy()
@@ -86,31 +92,33 @@ class CharacterComposer:
 
         # 手部基准位置修正 (基于居中后的坐标)
         # 原逻辑是 hand_x_base = 20, hand_y_base = 17 (在 32x32 网格中)
-        hand_x_base, hand_y_base = 20, 17
+        # 现升级为 64x64，坐标翻倍 -> 40, 34
+        hand_x_base, hand_y_base = 40, 34
         hand_x, hand_y = s(hand_x_base), s(hand_y_base) + bob
 
+        # Arm frame offsets (Scaled x2)
         if arm_frame == 1:
-            hand_x += s(2)
-            hand_y += s(3)
-        elif arm_frame == -1:
-            hand_x += s(1)
-            hand_y += s(4)
-        elif arm_frame == 2:
             hand_x += s(4)
-            hand_y -= s(2)
-        elif arm_frame == 3:
+            hand_y += s(6)
+        elif arm_frame == -1:
+            hand_x += s(2)
+            hand_y += s(8)
+        elif arm_frame == 2:
             hand_x += s(8)
             hand_y -= s(4)
+        elif arm_frame == 3:
+            hand_x += s(16)
+            hand_y -= s(8)
         elif arm_frame == 4:
-            hand_x += s(6)
-            hand_y -= s(6)
+            hand_x += s(12)
+            hand_y -= s(12)
 
         for layer in defs.LAYER_ORDER:
             part_key = layer
             if layer in ["legs_back", "legs_front"]:
                 part_key = "legs"
-            if layer == "arms":
-                part_key = "body"
+            if layer in ["arm_back", "arm_front", "hand_front"]:
+                part_key = "body"  # Use shirt color/style for arms
 
             style = self.selections.get(part_key, "none")
 
@@ -141,42 +149,42 @@ class CharacterComposer:
                 )
 
             elif layer == "legs_back":
-                lx, ly = s(12), s(24)
+                lx, ly = s(24), s(48)  # 12, 24 -> 24, 48
                 if leg_frame == -1:
-                    lx -= s(1)
-                    ly -= s(1)
+                    lx -= s(2)
+                    ly -= s(2)
                 if leg_frame == 1:
-                    lx += s(1)
+                    lx += s(2)
                 if leg_frame == 2:
-                    lx -= s(2)
-                    ly += s(1)
+                    lx -= s(4)
+                    ly += s(2)
                 if leg_frame == -2:
-                    lx -= s(2)
-                    ly -= s(4)
+                    lx -= s(4)
+                    ly -= s(8)
 
                 self.renderer.draw_part(
                     draw,
                     instructions,
                     current_base_x + lx,
-                    current_base_y + s(24) - bob + (ly - s(24)) + bob,
+                    current_base_y + s(48) - bob + (ly - s(48)) + bob,  # Base y 48
                     scale,
                     render_mode,
                     canvas=canvas,
                 )
 
             elif layer == "legs_front":
-                rx, ry = s(17), s(24) + bob
+                rx, ry = s(34), s(48) + bob  # 17, 24 -> 34, 48
                 if leg_frame == -1:
-                    rx += s(1)
-                if leg_frame == 1:
-                    rx -= s(1)
-                    ry -= s(1)
-                if leg_frame == 2:
                     rx += s(2)
-                    ry += s(1)
+                if leg_frame == 1:
+                    rx -= s(2)
+                    ry -= s(2)
+                if leg_frame == 2:
+                    rx += s(4)
+                    ry += s(2)
                 if leg_frame == -2:
-                    rx += s(1)
-                    ry -= s(1)
+                    rx += s(2)
+                    ry -= s(2)
 
                 final_x = offset_x + (self.base_offset_x * scale) + global_x_off + rx
                 final_y = (self.base_offset_y * scale) + ry
@@ -191,69 +199,145 @@ class CharacterComposer:
                     canvas=canvas,
                 )
 
-            elif layer == "arms":
+            elif layer == "arm_back":
+                # 左手 (后手) - 通常不拿武器，或者拿副手
+                # 简单摆动逻辑
                 color = self.get_color("shirt")
-                ay = (self.base_offset_y * scale) + s(17) + bob
-                ax_base = offset_x + (self.base_offset_x * scale) + global_x_off
+                shoulder_x = current_base_x + s(14)
+                shoulder_y = current_base_y + s(34)
 
-                # [Hi-Bit Arm Refinement]
-                # Instead of one big rect, draw main arm + shadow/highlight
-
-                # Helper to draw detailed pixel arm
-                def draw_pixel_arm(rect_coords):
-                    x1, y1, x2, y2 = rect_coords
-                    w = x2 - x1
-                    h = y2 - y1
-
-                    # Main flesh/sleeve
-                    draw.rectangle([x1, y1, x2, y2], fill=color)
-
-                    # Shadow (Right/Bottom edge)
-                    shadow_col = self.adjust_color(color, 0.7)
-                    if w > h:  # Horizontal arm
-                        draw.rectangle([x1, y2 - s(1), x2, y2], fill=shadow_col)
-                    else:  # Vertical arm
-                        draw.rectangle([x2 - s(1), y1, x2, y2], fill=shadow_col)
-
-                    # Highlight (Top/Left edge) - Subtle
-                    light_col = self.adjust_color(color, 1.1)
-                    if w > h:
-                        draw.rectangle([x1, y1, x2, y1 + s(0.5)], fill=light_col)
-                    else:
-                        draw.rectangle([x1, y1, x1 + s(0.5), y2], fill=light_col)
-
-                # Arm Coords (相对于 ax_base, ay)
-                l_rect = [ax_base + s(10), ay, ax_base + s(11), ay + s(6)]
-                r_rect = [ax_base + s(20), ay, ax_base + s(21), ay + s(6)]
+                # 手腕位置 (基于 arm_frame)
+                hand_target_x = shoulder_x + s(2)
+                hand_target_y = shoulder_y + s(12)
 
                 if arm_frame == 1:
-                    l_rect = [ax_base + s(10), ay - s(1), ax_base + s(11), ay + s(5)]
-                    r_rect = [ax_base + s(20), ay + s(1), ax_base + s(22), ay + s(4)]
+                    hand_target_x -= s(4)
+                    hand_target_y -= s(2)
                 elif arm_frame == -1:
-                    l_rect = [ax_base + s(10), ay + s(1), ax_base + s(12), ay + s(4)]
-                    r_rect = [ax_base + s(20), ay - s(1), ax_base + s(21), ay + s(5)]
-                elif arm_frame == 2:
-                    r_rect = [ax_base + s(20), ay - s(2), ax_base + s(24), ay]
-                    l_rect = [ax_base + s(10), ay + s(1), ax_base + s(11), ay + s(6)]
-                elif arm_frame == 3:
-                    r_rect = [
-                        ax_base + s(20),
-                        ay - s(4),
-                        ax_base + s(28),
-                        ay - s(2),
-                    ]  # Stretch
-                    l_rect = [ax_base + s(10), ay + s(2), ax_base + s(12), ay + s(6)]
-                elif arm_frame == 4:
-                    r_rect = [
-                        ax_base + s(20),
-                        ay - s(6),
-                        ax_base + s(26),
-                        ay - s(4),
-                    ]  # Up high
-                    l_rect = [ax_base + s(10), ay + s(1), ax_base + s(11), ay + s(6)]
+                    hand_target_x += s(4)
+                    hand_target_y -= s(2)
+                elif arm_frame >= 2:  # Attack mode, arm goes back
+                    hand_target_x -= s(6)
+                    hand_target_y -= s(4)
 
-                draw_pixel_arm(l_rect)
-                draw_pixel_arm(r_rect)
+                # Draw Arm (Shoulder to Hand)
+                # Simple thick line or rect
+                draw.rectangle(
+                    [shoulder_x, shoulder_y, shoulder_x + s(4), hand_target_y],
+                    fill=color,
+                )
+
+                # Draw Hand (Skin)
+                draw.ellipse(
+                    [
+                        hand_target_x,
+                        hand_target_y - s(2),
+                        hand_target_x + s(4),
+                        hand_target_y + s(2),
+                    ],
+                    fill=self.get_color("skin"),
+                )
+
+            elif layer == "arm_front":
+                # 右手 (前手) - 拿武器的手
+                color = self.get_color("shirt")
+                shoulder_x = current_base_x + s(44)
+                shoulder_y = current_base_y + s(34)
+
+                # 关键：手腕位置必须与武器位置同步
+                # 武器位置是 final_hand_x, final_hand_y
+                # 我们需要重新计算一遍武器位置 logic (有点重复，但为了解耦先这样写)
+
+                wp_x, wp_y = s(hand_x_base), s(hand_y_base) + bob
+                # Apply arm_frame offsets (Same as compose_frame logic)
+                if arm_frame == 1:
+                    wp_x += s(4)
+                    wp_y += s(6)
+                elif arm_frame == -1:
+                    wp_x += s(2)
+                    wp_y += s(8)
+                elif arm_frame == 2:
+                    wp_x += s(8)
+                    wp_y -= s(4)
+                elif arm_frame == 3:
+                    wp_x += s(16)
+                    wp_y -= s(8)
+                elif arm_frame == 4:
+                    wp_x += s(12)
+                    wp_y -= s(12)
+
+                final_wrist_x = (
+                    offset_x + (self.base_offset_x * scale) + global_x_off + wp_x
+                )
+                final_wrist_y = (self.base_offset_y * scale) + wp_y
+
+                # Draw Arm (Shoulder to Wrist)
+                # 使用多边形连接肩膀和手腕，避免断裂
+                points = [
+                    (shoulder_x, shoulder_y),
+                    (shoulder_x + s(4), shoulder_y),
+                    (final_wrist_x + s(2), final_wrist_y),
+                    (final_wrist_x - s(2), final_wrist_y),
+                ]
+                draw.polygon(points, fill=color)
+
+                # Add Shadow/Outline
+                line_col = self.adjust_color(color, 0.8)
+                # draw.line([(shoulder_x, shoulder_y), (final_wrist_x, final_wrist_y)], fill=line_col, width=int(s(1)))
+
+            elif layer == "hand_front":
+                # 绘制握住武器的手 (Fist)
+                # 坐标同 arm_front 的 wrist
+                wp_x, wp_y = s(hand_x_base), s(hand_y_base) + bob
+                if arm_frame == 1:
+                    wp_x += s(4)
+                    wp_y += s(6)
+                elif arm_frame == -1:
+                    wp_x += s(2)
+                    wp_y += s(8)
+                elif arm_frame == 2:
+                    wp_x += s(8)
+                    wp_y -= s(4)
+                elif arm_frame == 3:
+                    wp_x += s(16)
+                    wp_y -= s(8)
+                elif arm_frame == 4:
+                    wp_x += s(12)
+                    wp_y -= s(12)
+
+                cx = offset_x + (self.base_offset_x * scale) + global_x_off + wp_x
+                cy = (self.base_offset_y * scale) + wp_y
+
+                # Draw Fist (Not just a circle)
+                skin_col = self.get_color("skin")
+                outline_col = self.adjust_color(skin_col, 0.8)  # Shadow color
+
+                # Fist Base (Rounded Rect)
+                # Size: approx 6x6 units (scaled)
+                half_size = s(3)
+                x1, y1 = cx - half_size, cy - half_size
+                x2, y2 = cx + half_size, cy + half_size
+
+                # Main block
+                draw.rectangle([x1, y1, x2, y2], fill=skin_col)
+
+                # Thumb (Top-Left overlap to show grip)
+                # Simulate thumb wrapping over the weapon handle
+                thumb_x1 = x1 - s(1)
+                thumb_y1 = y1 - s(1)
+                thumb_x2 = x1 + s(2)
+                thumb_y2 = y1 + s(2)
+                draw.rectangle([thumb_x1, thumb_y1, thumb_x2, thumb_y2], fill=skin_col)
+
+                # Shading (Bottom/Right)
+                draw.rectangle(
+                    [x1, y2 - s(1), x2, y2], fill=outline_col
+                )  # Bottom shadow
+                draw.rectangle([x2 - s(1), y1, x2, y2], fill=outline_col)  # Side shadow
+
+                # Knuckle Highlight
+                light_col = self.adjust_color(skin_col, 1.1)
+                draw.rectangle([x1, y1, x1 + s(2), y1 + s(2)], fill=light_col)
 
             elif layer == "held":
                 style = self.selections.get("held", "none")

@@ -131,45 +131,42 @@
 
         .preview-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px; 
+            grid-template-columns: repeat(4, 1fr); /* 4 Columns */
+            gap: 8px; 
             width: 100%;
-            max-width: min(800px, calc(100vh - 200px));
+            /* Make it wider to fit 4 columns comfortably */
+            max-width: 100%; 
         }
 
         .preview-card-item {
             background: var(--surface);
-            padding: 10px;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-md);
+            padding: 6px;
+            border-radius: var(--radius-sm); /* Slightly smaller radius */
+            box-shadow: var(--shadow-sm);
             border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
             transition: var(--transition);
         }
         
-        .preview-card-item:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
         .preview-header {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.8rem;
+            font-size: 0.7rem; /* Smaller text */
             color: var(--text-secondary);
             font-weight: 600;
+            padding: 0 2px;
         }
 
         .pixel-canvas-small {
             width: 100%;
             aspect-ratio: 1;
             background-color: #e6e6e6;
-            border-radius: var(--radius-sm);
+            border-radius: 4px;
             image-rendering: pixelated;
             object-fit: contain;
             transition: background-color 0.3s ease;
@@ -686,12 +683,17 @@
             // Actions
             idle: "待机呼吸", walk: "行走", attack: "攻击动作", jump: "跳跃",
             run: "奔跑冲刺", hurt: "受击/击退", die: "死亡倒地", cheer: "胜利欢呼",
+            
+            // UI Labels
+            generating: "正在生成像素...",
+            download_png: "下载超清原图",
+            toast_batch: "批量生成完成！"
         };
 
 
         function getLabel(category, key) {
-            // 1. Try exact match in options
-            if (TRANSLATIONS.options[key]) return TRANSLATIONS.options[key];
+            // 1. Try exact match in root (flattened options)
+            if (TRANSLATIONS[key]) return TRANSLATIONS[key];
             // 2. Try category specific map
             if (TRANSLATIONS[category] && TRANSLATIONS[category][key]) return TRANSLATIONS[category][key];
             // 3. Fallback: Just return key
@@ -700,11 +702,11 @@
 
         // --- State Management ---
         // 默认参数：512px 输出, 8.0 密度 (超清渲染细节)
-        // [修改] 默认选中 4 个动作：待机、行走、奔跑、攻击
+        // [修改] 默认选中 8 个动作
         let currentConfig = { 
             parts: {}, 
             palette: {}, 
-            actions: ["idle", "walk", "run", "attack"], 
+            actions: ["idle", "walk", "run", "attack", "jump", "hurt", "die", "cheer"], 
             render_mode: "hibit",
             density: "8.0",
             output_size: "512" 
@@ -833,12 +835,8 @@
                     currentConfig.actions.splice(idx, 1);
                 }
             } else {
-                if (currentConfig.actions.length < 4) { 
-                    currentConfig.actions.push(actionName);
-                } else {
-                    showToast("最多选择 4 个动作", true);
-                    return; 
-                }
+                // [Modified] Removed limit < 4
+                currentConfig.actions.push(actionName);
             }
             updateActionUI();
             generateImage();

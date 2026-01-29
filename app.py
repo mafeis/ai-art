@@ -52,17 +52,24 @@ def get_options():
 
 @app.route("/config", methods=["GET"])
 def get_config():
-    try:
-        with open(CONFIG_PATH, "r") as f:
-            config = yaml.safe_load(f)
-        for k, v in defs.DEFAULT_PALETTE.items():
-            if k not in config.get("palette", {}):
-                if "palette" not in config:
-                    config["palette"] = {}
-                config["palette"][k] = v
-        return jsonify(config)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    # Construct config directly from code definitions
+    # This ensures it is always in sync with parts.py
+
+    # 1. Build default parts list (pick first option for each category)
+    default_parts = {}
+    for part_key, styles in defs.PART_DEFINITIONS.items():
+        if styles:
+            # Pick first available style
+            default_parts[part_key] = list(styles.keys())[0]
+
+    # 2. Build config object
+    config = {
+        "canvas": {"width": 32, "height": 32},
+        "parts": default_parts,
+        "palette": defs.DEFAULT_PALETTE.copy(),
+    }
+
+    return jsonify(config)
 
 
 @app.route("/randomize", methods=["GET"])
@@ -72,12 +79,11 @@ def randomize():
 
     # 1. Determine Actual Theme (if 'all', pick one)
     available_themes = [
-        "xianxia",
-        "tech",
-        "western",
-        "cyberpunk",
-        "steampunk",
-        "horror",
+        "fantasy",
+        "scifi",
+        "modern",
+        "cute",
+        "action",
     ]
     if theme == "all":
         selected_theme = random.choice(available_themes)

@@ -64,36 +64,89 @@ class CharacterRenderer:
                         width=outline_width,
                     )
 
-                elif is_hd:
-                    # HD Render
-                    outline_width = max(1, scale * 0.15)
-                    outline_color = self.provider.adjust_color(base_color, 0.6)
-                    radius = min(sw, sh) * 0.3
-                    draw.rounded_rectangle(
-                        [x1, y1, x1 + sw, y1 + sh],
-                        radius=radius,
-                        fill=base_color,
-                        outline=outline_color,
-                        width=int(outline_width),
+                if is_hd:
+                    # HD Render: Material-based Shading & Micro-Texture
+                    color_key = cmd[2]
+                    is_metal = (
+                        "metal" in color_key
+                        or "gold" in color_key
+                        or "silver" in color_key
                     )
-                    light_color = self.provider.adjust_color(base_color, 1.2)
-                    inset = scale * 0.2
-                    if sh > inset * 2:
-                        draw.rounded_rectangle(
-                            [x1 + inset, y1 + inset, x1 + sw - inset, y1 + sh * 0.5],
-                            radius=radius * 0.8,
-                            fill=light_color,
+                    is_skin = "skin" in color_key
+                    is_hair = "hair" in color_key
+                    is_glowing = "neon" in color_key or "light" in color_key
+
+                    # 1. Base Fill
+                    draw.rectangle([x1, y1, x1 + sw, y1 + sh], fill=base_color)
+
+                    if is_glowing:
+                        # Glow: Inner white core
+                        if sw > 4 and sh > 4:
+                            core_col = (255, 255, 255, 128)
+                            draw.rectangle(
+                                [x1 + 2, y1 + 2, x1 + sw - 2, y1 + sh - 2],
+                                fill=core_col,
+                            )
+
+                    elif is_metal:
+                        # Metal: High Contrast Glare
+                        highlight = self.provider.adjust_color(base_color, 1.4)
+                        shadow = self.provider.adjust_color(base_color, 0.6)
+
+                        # Diagonal Sheen
+                        draw.rectangle(
+                            [x1, y1, x1 + sw, y1 + max(1, scale * 0.5)], fill=highlight
+                        )  # Top rim
+                        draw.rectangle(
+                            [x1, y1, x1 + max(1, scale * 0.5), y1 + sh], fill=highlight
+                        )  # Left rim
+
+                        # Deep Shadow
+                        draw.rectangle(
+                            [x1, y1 + sh - max(1, scale * 0.5), x1 + sw, y1 + sh],
+                            fill=shadow,
+                        )  # Bot
+                        draw.rectangle(
+                            [x1 + sw - max(1, scale * 0.5), y1, x1 + sw, y1 + sh],
+                            fill=shadow,
+                        )  # Right
+
+                    elif is_skin:
+                        # Skin: Soft Subsurface Scattering (Reddish shadow)
+                        shadow = self.provider.adjust_color(
+                            base_color, 0.9
+                        )  # Very subtle
+                        draw.rectangle(
+                            [x1, y1 + sh - max(1, scale * 0.5), x1 + sw, y1 + sh],
+                            fill=shadow,
                         )
-                    highlight_size = min(sw, sh) * 0.25
-                    draw.ellipse(
-                        [
-                            x1 + sw * 0.1,
-                            y1 + sh * 0.1,
-                            x1 + sw * 0.1 + highlight_size,
-                            y1 + sh * 0.1 + highlight_size,
-                        ],
-                        fill=(255, 255, 255, 128),
-                    )
+
+                    else:  # Cloth / Hair / Wood
+                        # Matte Texture with Noise
+                        highlight = self.provider.adjust_color(base_color, 1.1)
+                        shadow = self.provider.adjust_color(base_color, 0.85)
+
+                        # Rim Light
+                        draw.rectangle(
+                            [x1, y1, x1 + sw, y1 + max(1, scale * 0.5)], fill=highlight
+                        )
+
+                        # Soft Shadow
+                        draw.rectangle(
+                            [x1, y1 + sh - max(1, scale * 0.5), x1 + sw, y1 + sh],
+                            fill=shadow,
+                        )
+
+                        # Procedural Noise (Dithering)
+                        if sw > 4 and sh > 4:
+                            noise_density = 0.05
+                            noise_count = int(sw * sh * noise_density)
+                            noise_col = self.provider.adjust_color(base_color, 0.95)
+                            for _ in range(noise_count):
+                                nx = x1 + random.random() * sw
+                                ny = y1 + random.random() * sh
+                                draw.point((nx, ny), fill=noise_col)
+
                 else:
                     # Retro
                     draw.rectangle([x1, y1, x1 + sw, y1 + sh], fill=base_color)
@@ -143,8 +196,21 @@ class CharacterRenderer:
                 base_color = self.provider.get_color(cmd[2])
 
                 if is_hd:
-                    outline_color = self.provider.adjust_color(base_color, 0.6)
-                    draw.polygon(points, fill=base_color, outline=outline_color)
+                    # HD Polygon: Fill
+                    draw.polygon(points, fill=base_color)
+
+                    # Material Edge Definition
+                    color_key = cmd[2]
+                    is_metal = "metal" in color_key or "gold" in color_key
+
+                    if is_metal:
+                        # Sharp Highlight Edge
+                        edge_col = self.provider.adjust_color(base_color, 1.3)
+                        draw.line(points + [points[0]], fill=edge_col, width=1)
+                    else:
+                        # Subtle Definition
+                        edge_col = self.provider.adjust_color(base_color, 0.9)
+                        draw.line(points + [points[0]], fill=edge_col, width=1)
                 else:
                     draw.polygon(points, fill=base_color)
 
@@ -311,6 +377,15 @@ class CharacterRenderer:
             )
             return
 
+        # [Fix] Apply pivot offset even if not rotating
+        # The pivot point on the sprite (pivot_offset) should align with the anchor (offset_x, offset_y)
+        # So we shift the drawing by -pivot
+        px = pivot_offset[0] * scale
+        py = pivot_offset[1] * scale
+
+        draw_x = offset_x - px
+        draw_y = offset_y - py
+
         self._render_instructions(
-            draw, instructions, offset_x, offset_y, scale, render_mode
+            draw, instructions, draw_x, draw_y, scale, render_mode
         )

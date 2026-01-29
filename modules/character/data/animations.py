@@ -152,22 +152,20 @@ ANIMATION_DEFINITIONS = {
 }
 
 # Weapon Metadata for Animation Selection
+# Pivot is in 64x64 coordinate space relative to weapon origin
 WEAPON_METADATA = {
-    "sword": {"type": "slash", "pivot": (0, 10)},
-    "blade": {"type": "slash", "pivot": (0, 10)},
-    "katana": {"type": "slash", "pivot": (0, 10)},
-    "axe": {"type": "heavy", "pivot": (0, 10)},
-    "staff": {"type": "cast", "pivot": (0, 0)},
-    "wand": {"type": "cast", "pivot": (0, 0)},
-    "spear": {"type": "slash", "pivot": (0, 0)},  # Or thrust
-    "jian": {"type": "slash", "pivot": (0, 10)},
-    "fan": {"type": "cast", "pivot": (0, 10)},
-    "gourd": {"type": "cast", "pivot": (0, 5)},
-    "laser_gun": {"type": "shoot", "pivot": (-2, 4)},
-    "katana_laser": {"type": "slash", "pivot": (0, 10)},
-    "wrench": {"type": "heavy", "pivot": (0, 10)},
-    "chainsaw": {"type": "heavy", "pivot": (-4, 4)},
-    "butcher_knife": {"type": "slash", "pivot": (0, 8)},
-    "shield": {"type": "heavy", "pivot": (0, 0)},  # Bash
-    "none": {"type": "slash", "pivot": (0, 0)},  # Punch
+    # Melee
+    "sword_iron": {"type": "slash", "pivot": (1, 23)},  # Hilt center
+    "katana": {"type": "slash", "pivot": (1, 14)},
+    "buster_sword": {"type": "heavy", "pivot": (1.5, 14.5)},
+    # Magic
+    "staff_magic": {"type": "cast", "pivot": (0, 0)},  # Center grip
+    "star_wand": {"type": "cast", "pivot": (0, 0)},
+    "book_spell": {"type": "cast", "pivot": (2, 4)},
+    # Ranged
+    "plasma_rifle": {"type": "shoot", "pivot": (0, 6)},
+    # Misc
+    "shield_round": {"type": "heavy", "pivot": (0, 0)},
+    "tea_cup": {"type": "cast", "pivot": (0, 4)},  # Hold cup
+    "none": {"type": "slash", "pivot": (0, 0)},
 }
