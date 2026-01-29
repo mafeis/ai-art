@@ -131,24 +131,28 @@
 
         .preview-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 Columns */
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, 1fr); /* Force 2 rows */
             gap: 8px; 
             width: 100%;
-            /* Make it wider to fit 4 columns comfortably */
-            max-width: 100%; 
+            height: calc(100vh - 100px); /* Fill vertical space minus header/padding */
+            min-height: 0; /* Allow flex shrink */
+            align-content: start;
         }
 
         .preview-card-item {
             background: var(--surface);
-            padding: 6px;
-            border-radius: var(--radius-sm); /* Slightly smaller radius */
+            padding: 4px;
+            border-radius: var(--radius-sm);
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 4px;
+            justify-content: space-between; 
             transition: var(--transition);
+            perspective: 300px;
+            overflow: visible;
+            height: 100%; 
         }
         
         .preview-header {
@@ -156,19 +160,21 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.7rem; /* Smaller text */
+            font-size: 0.7rem; 
             color: var(--text-secondary);
             font-weight: 600;
-            padding: 0 2px;
+            padding: 2px 4px;
+            flex-shrink: 0;
         }
 
         .pixel-canvas-small {
             width: 100%;
-            aspect-ratio: 1;
+            height: 100%; /* Fill available space */
+            flex-grow: 1; /* Take up all space */
             background-color: #e6e6e6;
             border-radius: 4px;
             image-rendering: pixelated;
-            object-fit: contain;
+            object-fit: contain; /* Keep aspect ratio but fill box */
             transition: background-color 0.3s ease;
         }
 
@@ -176,13 +182,17 @@
             background: var(--bg-color);
             border: 1px solid var(--border);
             color: var(--text-primary);
-            padding: 4px 8px;
+            padding: 4px 0;
             border-radius: 4px;
             font-size: 0.7rem;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
             transition: var(--transition);
+            width: 100%;
+            text-align: center;
+            margin-top: 4px;
+            flex-shrink: 0;
         }
         
         .mini-btn:hover {
@@ -190,6 +200,92 @@
             color: white;
             border-color: var(--text-primary);
         }
+
+        /* 3D Wrapper */
+        .pixel-3d-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            flex-grow: 1;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            cursor: grab;
+        }
+
+        .pixel-3d-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .pixel-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            pointer-events: none;
+        }
+
+        .pixel-layer.main {
+            z-index: 20;
+            transform: translateZ(0px);
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+        }
+
+        .pixel-layer.side {
+            filter: brightness(0.2) sepia(1) hue-rotate(200deg) saturate(0.5);
+        }
+
+        /* Lightbox Overlay */
+        .lightbox-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lightbox-content {
+            width: 80vh; 
+            height: 80vh;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .lightbox-close:hover { opacity: 1; }
 
         /* Controls Components */
         .control-section {
@@ -384,16 +480,15 @@
             transform: translateY(0);
         }
 
-        /* Overlay / Floating UI */
-        .floating-tools {
-            margin-top: 10px;
+        /* Stage Header (Formerly Floating Tools) */
+        .stage-header {
+            width: 100%;
             display: flex;
-            gap: 16px;
-            background: var(--surface);
-            padding: 8px 16px;
-            border-radius: 100px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
+            justify-content: flex-end; /* Align right */
+            align-items: center;
+            gap: 12px;
+            padding: 0 0 16px 0; /* Spacing below */
+            flex-shrink: 0; /* Don't shrink */
         }
 
         .tool-btn {
@@ -483,83 +578,28 @@
                 </div>
             </div>
 
-            <!-- Global Settings -->
-            <div class="control-section">
-                <div class="section-header">
-                    <span>风格与主题</span>
-                    <button class="tool-btn" onclick="randomizeAll()" title="全局随机">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                    </button>
-                </div>
-                <div class="control-grid full">
-                    <div class="select-wrapper">
-                        <select id="theme-select">
-                            <option value="all">🎲 混合风格</option>
-                            <option value="xianxia">🏔️ 仙侠 / 古风</option>
-                            <option value="tech">🦾 未来科技</option>
-                            <option value="western">🏰 西方魔幻</option>
-                            <option value="cyberpunk">🌃 赛博朋克</option>
-                            <option value="steampunk">⚙️ 蒸汽朋克</option>
-                            <option value="horror">👻 恐怖 / 丧尸</option>
-                        </select>
-                        <svg class="select-icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-                    </div>
-                </div>
+            <div style="margin-bottom: 24px; display: flex; gap: 12px;">
+                <button class="btn btn-primary" onclick="randomizeAll()" style="flex: 1; background: var(--text-primary);">
+                    🎲 随机生成角色
+                </button>
             </div>
 
-            <!-- Render Settings (Hidden as per requirement) -->
+            <!-- Hidden Settings -->
             <div class="control-section" style="display: none;">
-                <div class="section-header">
-                    <span>画质设置</span>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <div class="label" style="margin-bottom: 8px;">输出尺寸 (像素)</div>
-                    <div class="segmented-control" id="size-control">
-                        <button class="segment-btn" data-value="64">64</button>
-                        <button class="segment-btn" data-value="128">128</button>
-                        <button class="segment-btn" data-value="256">256</button>
-                        <button class="segment-btn active" data-value="512">512</button>
-                    </div>
-                    <!-- 默认设为 512 -->
-                    <input type="hidden" id="output-size-select" value="512">
-                </div>
-
-                <div style="margin-bottom: 15px;">
-                    <div class="label" style="margin-bottom: 8px;">像素密度 (精细度)</div>
-                    <div class="segmented-control" id="density-control">
-                        <button class="segment-btn" data-value="0.5">低</button>
-                        <button class="segment-btn" data-value="1.0">标准</button>
-                        <button class="segment-btn" data-value="4.0">高清</button>
-                        <button class="segment-btn active" data-value="8.0">超清</button>
-                    </div>
-                    <input type="hidden" id="density-select" value="8.0">
-                </div>
-                
-                <div>
-                    <div class="select-wrapper">
-                        <select id="render-mode-select" onchange="generateImage()">
-                            <option value="hibit" selected>✨ 现代高位 (默认)</option>
-                        </select>
-                        <svg class="select-icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-                    </div>
-                </div>
+                <input type="hidden" id="output-size-select" value="512">
+                <input type="hidden" id="density-select" value="8.0">
+                <select id="render-mode-select"><option value="hibit" selected></option></select>
             </div>
 
             <!-- Appearance -->
             <div class="control-section">
                 <div class="section-header">
                     <span>外观组件</span>
-                    <button class="tool-btn" onclick="randomizeParts()" title="外观随机" style="width: 24px; height: 24px; padding: 0;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                    </button>
                 </div>
                 
                 <div class="input-group" style="margin-bottom: 15px;">
                      <div class="label">动作预览 <span style="font-weight:normal;color:#999;font-size:0.7em">(多选 / 最多4个)</span></div>
-                     <div id="action-control-container">
-                        <!-- JS generated buttons -->
-                     </div>
+                     <div id="action-control-container"></div>
                 </div>
 
                 <div class="control-grid" id="parts-grid">
@@ -580,6 +620,28 @@
                 </div>
             </div>
 
+            <!-- Batch Export -->
+            <div class="control-section" style="border-top: 1px solid var(--border); padding-top: 20px;">
+                <div class="section-header">
+                    <span>批量工坊</span>
+                </div>
+                
+                <div style="margin-bottom: 12px;">
+                    <div class="label" style="margin-bottom:6px">随机生成并打包</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="segment-btn" onclick="batchExport(10)" style="border: 1px solid var(--border)">10个</button>
+                        <button class="segment-btn" onclick="batchExport(20)" style="border: 1px solid var(--border)">20个</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="label" style="margin-bottom:6px">当前角色</div>
+                    <button class="btn" onclick="downloadAtlas()" style="width:100%; border: 1px solid var(--accent); color: var(--accent); background: transparent;">
+                        📥 下载全动作图集 (Atlas)
+                    </button>
+                </div>
+            </div>
+
             <!-- Actions -->
             <div class="action-bar">
                 <button id="generate-btn" class="btn btn-primary" onclick="generateImage()">
@@ -597,16 +659,8 @@
                 <span>✨</span> <span id="toast-msg">就绪</span>
             </div>
 
-            <!-- Grid of Previews -->
-            <div class="preview-grid" id="preview-grid-container">
-                <!-- Dynamic Items will be injected here -->
-                <div class="preview-card-item">
-                     <div class="spinner" style="border-color: #ccc; border-top-color: #333; margin: 50px;"></div>
-                </div>
-            </div>
-
-            <!-- Global Stage Controls -->
-            <div class="floating-tools">
+            <!-- Global Stage Controls (Now Header) -->
+            <div class="stage-header">
                 <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-right: 8px;">
                     画布背景
                 </div>
@@ -620,12 +674,32 @@
                 </button>
 
                 <div style="width: 1px; height: 16px; background: var(--border); margin: 0 4px;"></div>
+                
+                <button class="tool-btn" id="toggle-3d-btn" onclick="toggle3D()" title="开启/关闭 3D 预览">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                </button>
 
                 <div id="stats-display" style="font-size: 0.7rem; color: var(--text-tertiary); font-family: monospace; display: flex; align-items: center;">
                     <!-- Stats injected here -->
                 </div>
             </div>
+
+            <!-- Grid of Previews -->
+            <div class="preview-grid" id="preview-grid-container">
+                <!-- Dynamic Items will be injected here -->
+                <div class="preview-card-item">
+                     <div class="spinner" style="border-color: #ccc; border-top-color: #333; margin: 50px;"></div>
+                </div>
+            </div>
         </main>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox(event)">
+        <button class="lightbox-close" onclick="closeLightbox(event)">×</button>
+        <div class="lightbox-content" id="lightbox-content" onclick="event.stopPropagation()">
+            <!-- Content Injected Here -->
+        </div>
     </div>
 
     <!-- JS Logic -->
@@ -714,6 +788,8 @@
         
         let partOptions = {};
         let userManuallySetBg = false;
+        let enable3D = false; // Default OFF
+        let lastResultData = null; // Cache for toggling 3D without refetch
 
         // --- Utils ---
         function hexToRgb(hex) {
@@ -782,7 +858,8 @@
 
         // --- Core Logic ---
         async function callRandomize(target = 'all') {
-            const theme = document.getElementById('theme-select').value;
+            // Removed theme selector
+            const theme = "all"; 
             const btn = document.querySelector(`.tool-btn[onclick="randomize${target === 'all' ? 'All' : (target.charAt(0).toUpperCase() + target.slice(1))}"]`);
             if(btn) btn.style.transform = "rotate(360deg)"; 
             
@@ -963,6 +1040,239 @@
         }
 
 
+        async function downloadAtlas() {
+            showToast("正在生成图集...");
+            try {
+                // Ensure output size is reasonable for big atlas
+                // currentConfig.output_size = "256"; // Maybe downscale? No, keep quality.
+                
+                const res = await fetch('/atlas', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(currentConfig)
+                });
+                if(res.ok) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `character_atlas_${Date.now()}.png`;
+                    a.click();
+                    showToast("图集下载成功！");
+                } else {
+                    showToast("图集生成失败", true);
+                }
+            } catch(e) {
+                console.error(e);
+                showToast("网络错误", true);
+            }
+        }
+
+        async function batchExport(count) {
+            showToast(`正在批量生成 ${count} 个角色，请稍候...`);
+            try {
+                const res = await fetch('/batch', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({count: count})
+                });
+                if(res.ok) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `pixel_batch_${count}.zip`;
+                    a.click();
+                    showToast("下载开始！");
+                } else {
+                    showToast("批量生成失败", true);
+                }
+            } catch(e) {
+                console.error(e);
+                showToast("网络错误", true);
+            }
+        }
+
+        function toggle3D() {
+            enable3D = !enable3D;
+            const btn = document.getElementById('toggle-3d-btn');
+            
+            if (enable3D) {
+                // Switch to Voxel Mode (Backend 2.5D + Frontend 3D)
+                btn.style.color = 'var(--accent)';
+                btn.style.background = 'rgba(0,0,0,0.05)';
+                currentConfig.render_mode = "voxel";
+            } else {
+                // Switch back to Flat Mode
+                btn.style.color = '';
+                btn.style.background = '';
+                currentConfig.render_mode = "hibit";
+            }
+            
+            // Must re-generate because the image content changes (thickness/shadow)
+            generateImage();
+        }
+
+        function renderPreviewGrid(data) {
+            const grid = document.getElementById('preview-grid-container');
+            grid.innerHTML = '';
+            
+            // Auto Contrast Background Calculation
+            let autoBg = "#f0f2f5";
+            if (!userManuallySetBg) {
+                const p = currentConfig.palette;
+                if(p && p.skin) {
+                    const luma = (p.skin[0] * 0.299 + p.skin[1] * 0.587 + p.skin[2] * 0.114);
+                    autoBg = luma > 150 ? "#2d3436" : "#f0f2f5";
+                    const picker = document.getElementById('stage-bg-picker');
+                    if(picker) picker.value = (autoBg === "#f0f2f5" ? "#f0f2f5" : "#2d3436");
+                }
+            } else {
+                 const picker = document.getElementById('stage-bg-picker');
+                 if(picker) autoBg = picker.value;
+            }
+
+            // Render Items
+            currentConfig.actions.forEach(act => {
+                const item = data.results[act];
+                if (!item) return;
+                
+                const card = document.createElement('div');
+                card.className = 'preview-card-item';
+                
+                const header = document.createElement('div');
+                header.className = 'preview-header';
+                header.innerHTML = `<span>${getLabel('options', act)}</span> <span style="font-weight:400; font-size:0.7rem">${item.size_kb}KB</span>`;
+                
+                let visualEl;
+                
+                if (enable3D) {
+                    // 3D Wrapper Construction
+                    const wrapper3d = document.createElement('div');
+                    wrapper3d.className = 'pixel-3d-wrapper';
+                    // Allow click to open lightbox
+                    wrapper3d.onclick = (e) => { e.stopPropagation(); openLightbox(item, true); };
+                    
+                    // 1. Thickness Layers (Increased depth for visibility)
+                    const depth = 16; 
+                    for(let i=1; i<=depth; i++) {
+                        const layer = document.createElement('div');
+                        layer.className = 'pixel-layer side';
+                        layer.style.backgroundImage = `url(${item.image})`;
+                        layer.style.transform = `translateZ(-${i}px)`;
+                        wrapper3d.appendChild(layer);
+                    }
+                    
+                    // 2. Main Layer
+                    const mainLayer = document.createElement('div');
+                    mainLayer.className = 'pixel-layer main';
+                    mainLayer.style.backgroundImage = `url(${item.image})`;
+                    wrapper3d.appendChild(mainLayer);
+                    
+                    // 3. Interaction
+                    wrapper3d.onmousemove = (e) => {
+                        const rect = wrapper3d.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        const cx = rect.width / 2;
+                        const cy = rect.height / 2;
+                        
+                        // Calculate rotation (Wider angles for more 3D impact)
+                        const rotateY = ((x - cx) / cx) * 60; // +/- 60 deg
+                        const rotateX = ((cy - cy) / cy) * -45; // +/- 45 deg
+                        
+                        wrapper3d.style.transform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+                    };
+                    wrapper3d.onmouseleave = () => {
+                        wrapper3d.style.transform = 'rotateY(0deg) rotateX(0deg)';
+                    };
+                    visualEl = wrapper3d;
+                } else {
+                    // Simple 2D Image
+                    const img = document.createElement('img');
+                    img.className = 'pixel-canvas-small';
+                    img.src = item.image;
+                    img.style.backgroundColor = autoBg;
+                    img.onclick = () => openLightbox(item, false);
+                    img.style.cursor = "zoom-in";
+                    visualEl = img;
+                }
+                
+                const dlBtn = document.createElement('a');
+                dlBtn.className = 'mini-btn';
+                dlBtn.href = item.download_data;
+                dlBtn.download = item.filename;
+                dlBtn.innerHTML = TRANSLATIONS.download_png;
+                dlBtn.style.width = '100%';
+                dlBtn.style.textAlign = 'center';
+                dlBtn.style.marginTop = '10px';
+                
+                card.appendChild(header);
+                card.appendChild(visualEl);
+                card.appendChild(dlBtn);
+                grid.appendChild(card);
+            });
+            
+            grid.style.opacity = 1;
+        }
+
+        function openLightbox(item, is3D) {
+            const lb = document.getElementById('lightbox');
+            const content = document.getElementById('lightbox-content');
+            content.innerHTML = '';
+            
+            if (is3D) {
+                // Reconstruct 3D Viewer (Larger scale)
+                const wrapper3d = document.createElement('div');
+                wrapper3d.className = 'pixel-3d-wrapper';
+                wrapper3d.style.cursor = 'grab';
+                
+                const depth = 24; // Deeper for large view
+                for(let i=1; i<=depth; i++) {
+                    const layer = document.createElement('div');
+                    layer.className = 'pixel-layer side';
+                    layer.style.backgroundImage = `url(${item.image})`;
+                    // Scale transform for bigger view? No, container size handles it.
+                    // Just need larger Z gap
+                    layer.style.transform = `translateZ(-${i*1.5}px)`; 
+                    wrapper3d.appendChild(layer);
+                }
+                
+                const mainLayer = document.createElement('div');
+                mainLayer.className = 'pixel-layer main';
+                mainLayer.style.backgroundImage = `url(${item.image})`;
+                wrapper3d.appendChild(mainLayer);
+                
+                wrapper3d.onmousemove = (e) => {
+                    const rect = wrapper3d.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const cx = rect.width / 2;
+                    const cy = rect.height / 2;
+                    const rotateY = ((x - cx) / cx) * 70; // Even wider
+                    const rotateX = ((cy - cy) / cy) * -60;
+                    wrapper3d.style.transform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+                };
+                content.appendChild(wrapper3d);
+            } else {
+                const img = document.createElement('img');
+                img.src = item.image;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'contain';
+                img.style.imageRendering = 'pixelated';
+                content.appendChild(img);
+            }
+            
+            lb.classList.add('active');
+        }
+
+        function closeLightbox(e) {
+            if(e.target.id === 'lightbox' || e.target.classList.contains('lightbox-close')) {
+                document.getElementById('lightbox').classList.remove('active');
+            }
+        }
+
         async function generateImage() {
             const btn = document.getElementById('generate-btn');
             const grid = document.getElementById('preview-grid-container');
@@ -992,57 +1302,8 @@
                 const data = await response.json();
                 
                 if (response.ok && data.results) {
-                    grid.innerHTML = ''; 
-                    
-                    // Auto Contrast Background Calculation
-                    let autoBg = "#f0f2f5";
-                    if (!userManuallySetBg) {
-                        const p = currentConfig.palette;
-                        if(p && p.skin) {
-                            const luma = (p.skin[0] * 0.299 + p.skin[1] * 0.587 + p.skin[2] * 0.114);
-                            autoBg = luma > 150 ? "#2d3436" : "#f0f2f5";
-                            const picker = document.getElementById('stage-bg-picker');
-                            if(picker) picker.value = (autoBg === "#f0f2f5" ? "#f0f2f5" : "#2d3436");
-                        }
-                    } else {
-                         const picker = document.getElementById('stage-bg-picker');
-                         if(picker) autoBg = picker.value;
-                    }
-
-                    // Render Grid Items
-                    // [修改] 强制按照 currentConfig.actions 的顺序渲染，确保预览顺序固定
-                    currentConfig.actions.forEach(act => {
-                        const item = data.results[act];
-                        if (!item) return; // 防御性检查
-                        
-                        const card = document.createElement('div');
-                        card.className = 'preview-card-item';
-                        
-                        const header = document.createElement('div');
-                        header.className = 'preview-header';
-                        // 使用中文 Action Name
-                        header.innerHTML = `<span>${getLabel('options', act)}</span> <span style="font-weight:400; font-size:0.7rem">${item.size_kb}KB</span>`;
-                        
-                        const img = document.createElement('img');
-                        img.className = 'pixel-canvas-small';
-                        img.src = item.image;
-                        img.style.backgroundColor = autoBg;
-                        
-                        const dlBtn = document.createElement('a');
-                        dlBtn.className = 'mini-btn';
-                        dlBtn.href = item.download_data;
-                        dlBtn.download = item.filename;
-                        dlBtn.innerHTML = TRANSLATIONS.download_png;
-                        dlBtn.style.width = '100%';
-                        dlBtn.style.textAlign = 'center';
-                        
-                        card.appendChild(header);
-                        card.appendChild(img);
-                        card.appendChild(dlBtn);
-                        grid.appendChild(card);
-                    });
-                    
-                    grid.style.opacity = 1;
+                    lastResultData = data; // Cache
+                    renderPreviewGrid(data);
 
                     if (data.stats) {
                         stats.innerText = `生成耗时: ${data.stats.duration}s | 总大小: ${data.stats.total_size_kb}KB`;

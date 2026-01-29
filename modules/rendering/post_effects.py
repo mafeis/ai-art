@@ -190,6 +190,56 @@ def apply_premium_polish(image):
     return _apply_effect_with_alpha_mask(image, result)
 
 
+def apply_25d_pop(image):
+    """
+    2.5D Pop Effect:
+    1. Ground Shadow (Oval)
+    2. Extrusion (Thickness)
+    3. Outline (Sticker feel)
+    """
+    image = _ensure_rgba(image)
+    width, height = image.size
+
+    # Create a new canvas to hold the effects (slightly larger if needed, but we used expanded canvas already)
+    # Actually we render in place to keep spritesheet alignment
+
+    # 1. Ground Shadow (Stronger)
+    shadow_layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    shadow_draw = ImageDraw.Draw(shadow_layer)
+
+    # 扩大阴影范围并加深
+    shadow_draw.ellipse(
+        [width // 2 - 28, height // 2 + 28, width // 2 + 28, height // 2 + 44],
+        fill=(0, 0, 0, 100),  # Darker shadow
+    )
+
+    # 2. Extrusion (Thicker & Darker)
+    thickness_layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+
+    # Make a VERY dark version for the side/back (Blocky look)
+    r, g, b, a = image.split()
+    dark_img = ImageEnhance.Brightness(image.convert("RGB")).enhance(0.3)  # Darker
+    r_d, g_d, b_d = dark_img.split()
+    dark_rgba = Image.merge("RGBA", (r_d, g_d, b_d, a))
+
+    # Stack deeper!
+    depth = 16  # Increased depth to match frontend 3D feel
+    for i in range(depth, 0, -1):
+        # Shift slightly right-down for isometric feel?
+        # Or just down for "Standee" feel. Let's do Down + slightly Right for 3D pop.
+        # shift_x = i // 2 # Slight right shift
+        shift_y = i
+        thickness_layer.alpha_composite(dark_rgba, (0, shift_y))
+
+    # 3. Composite: Shadow -> Thickness -> Main
+    final = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    final.alpha_composite(shadow_layer)
+    final.alpha_composite(thickness_layer)
+    final.alpha_composite(image)
+
+    return final
+
+
 def get_post_effect_for_mode(render_mode):
     effects = {
         "ink": apply_ink_effect,
@@ -198,6 +248,7 @@ def get_post_effect_for_mode(render_mode):
         "retro": apply_retro_crt,
         "hd": apply_vector_polish,
         "premium": apply_premium_polish,
-        "hibit": lambda x: x,  # Hi-Bit 保持像素纯净，不加滤镜
+        "voxel": apply_25d_pop,  # New explicit 2.5D mode
+        "hibit": lambda x: x,  # Back to pure flat pixel art
     }
     return effects.get(render_mode, lambda x: x)

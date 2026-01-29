@@ -23,6 +23,7 @@
 from flask import Flask, render_template, jsonify, request, send_file
 from modules.character import generator as gen_character
 from modules.character import definitions as defs
+from PIL import Image
 import time  # For performance stats
 import yaml
 import io
@@ -212,9 +213,143 @@ def randomize():
     )
 
 
+import zipfile
+import os
+import shutil
+
+# ... (existing code) ...
+
+
+@app.route("/atlas", methods=["POST"])
+def generate_atlas():
+    try:
+        config = request.json
+        if not config:
+            return jsonify({"error": "No config"}), 400
+
+        actions = ["idle", "walk", "run", "attack", "jump", "hurt", "die", "cheer"]
+        sheets = []
+        max_w = 0
+        total_h = 0
+
+        density = float(config.get("density", 8.0))
+        output_size = int(config.get("output_size", 512))
+        render_mode = config.get("render_mode", "hibit")
+
+        # Generate all sheets
+        for act in actions:
+            img = gen_character.create_character_spritesheet(
+                config_source=config,
+                action=act,
+                density=density,
+                output_size=output_size,
+                render_mode=render_mode,
+            )
+            sheets.append(img)
+            max_w = max(max_w, img.width)
+            total_h += img.height
+
+        # Stitch
+        atlas = Image.new("RGBA", (max_w, total_h), (0, 0, 0, 0))
+        y_off = 0
+        for img in sheets:
+            # Center if width differs (unlikely with fixed size but good for safety)
+            x_off = (max_w - img.width) // 2
+            atlas.paste(img, (x_off, y_off))
+            y_off += img.height
+
+        buf = io.BytesIO()
+        atlas.save(buf, format="PNG")
+        buf.seek(0)
+
+        return send_file(
+            buf,
+            mimetype="image/png",
+            as_attachment=True,
+            download_name=f"character_atlas_{int(time.time())}.png",
+        )
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/batch", methods=["POST"])
+def generate_batch():
+    try:
+        data = request.json
+        count = int(data.get("count", 10))
+        if count > 50:
+            count = 50  # Limit
+
+        # Create temp dir for batch
+        batch_id = str(int(time.time()))
+        batch_dir = os.path.join("temp_batch", batch_id)
+        os.makedirs(batch_dir, exist_ok=True)
+
+        # Standard actions to generate for each character
+        actions = ["idle", "walk", "attack", "die"]
+
+        for i in range(count):
+            # 1. Randomize
+            # Call randomize logic manually (refactor randomize to be callable would be better, but we can simulate)
+            # Simplified randomization here for speed
+            char_parts = {}
+            for k, styles in defs.PART_DEFINITIONS.items():
+                if styles:
+                    char_parts[k] = random.choice(list(styles.keys()))
+
+            char_palette = {}
+            for k in defs.DEFAULT_PALETTE.keys():
+                # Simple random color
+                char_palette[k] = [random.randint(50, 255) for _ in range(3)]
+
+            config = {
+                "parts": char_parts,
+                "palette": char_palette,
+                "render_mode": "hibit",
+                "density": 8.0,
+            }
+
+            # 2. Generate Sheets
+            for act in actions:
+                img = gen_character.create_character_spritesheet(
+                    config_source=config,
+                    action=act,
+                    density=8.0,
+                    output_size=512,
+                    render_mode="hibit",
+                )
+                fname = f"char_{i + 1:03d}_{act}.png"
+                img.save(os.path.join(batch_dir, fname))
+
+        # 3. Zip it
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for root, _, files in os.walk(batch_dir):
+                for file in files:
+                    zip_file.write(os.path.join(root, file), file)
+
+        # Cleanup
+        shutil.rmtree(batch_dir)
+
+        zip_buffer.seek(0)
+        return send_file(
+            zip_buffer,
+            mimetype="application/zip",
+            as_attachment=True,
+            download_name=f"pixel_batch_{batch_id}.zip",
+        )
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/generate", methods=["POST"])
 def generate_image():
     start_time = time.time()
+
     try:
         config = request.json
         if not config:

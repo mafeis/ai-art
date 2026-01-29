@@ -22,16 +22,14 @@ class CharacterComposer:
         # [Expanded Canvas] Increase size to prevent clipping during animations
         # User config might say 64, but we force internal canvas larger
         # Logic: Character is designed in 64x64 grid.
-        # We need a buffer. Let's use 128x128 internal canvas.
-        self.width = 128
-        self.height = 128
+        # We use a huge buffer (192x192) to absolutely prevent any clipping.
+        self.width = 192
+        self.height = 192
 
-        # 居中偏移量 (Center the 64x64 design in the 128x128 canvas)
+        # 居中偏移量 (Center the 64x64 design in the 192x192 canvas)
         design_w, design_h = 64, 64
         self.base_offset_x = (self.width - design_w) // 2
-        self.base_offset_y = (
-            self.height - design_h
-        ) // 2 + 16  # Shift down slightly for headroom
+        self.base_offset_y = (self.height - design_h) // 2 + 16  # Shift down slightly
 
         self.selections = config.get("parts", {})
         self.palette = defs.DEFAULT_PALETTE.copy()

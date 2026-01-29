@@ -202,15 +202,25 @@ class CharacterRenderer:
                     # Material Edge Definition
                     color_key = cmd[2]
                     is_metal = "metal" in color_key or "gold" in color_key
+                    is_hair = "hair" in color_key
+                    is_skin = "skin" in color_key
 
                     if is_metal:
                         # Sharp Highlight Edge
                         edge_col = self.provider.adjust_color(base_color, 1.3)
                         draw.line(points + [points[0]], fill=edge_col, width=1)
+                    elif is_skin:
+                        # No outline for skin, keep soft
+                        pass
+                    elif is_hair:
+                        # Subtle hair separation
+                        edge_col = self.provider.adjust_color(base_color, 0.9)
+                        # draw.line(points + [points[0]], fill=edge_col, width=1)
                     else:
-                        # Subtle Definition
+                        # Cloth: Subtle definition
                         edge_col = self.provider.adjust_color(base_color, 0.9)
                         draw.line(points + [points[0]], fill=edge_col, width=1)
+
                 else:
                     draw.polygon(points, fill=base_color)
 
