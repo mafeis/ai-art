@@ -1,8 +1,8 @@
 from PIL import Image, ImageDraw
 import yaml
 import sys
-import character_definitions as defs
-import post_effects  # 艺术滤镜系统
+from modules.character import definitions as defs
+from modules.rendering import post_effects  # 艺术滤镜系统
 import io
 import random
 

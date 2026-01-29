@@ -1,11 +1,14 @@
 """
-Advanced Game Character Generator (Cairo-based)
-Generates production-ready 2D game assets in "Hollow Knight" / "Indie Hand-drawn" style.
-Features:
-- Tapered brush strokes (simulating pressure sensitivity)
-- Organic vector shapes (no primitive rectangles/circles)
-- Dynamic rigging system for animation frames
-- Layered rendering (Cloak, Armor, Body, Weapon)
+模块名称: 高级矢量角色生成器 (Advanced Vector Character Generator)
+文件用途:
+    这是一个基于 Cairo 的实验性生成器，用于生成具有"手绘"或"独立游戏"风格的骨骼动画角色。
+
+    主要特性:
+    - 模拟压感笔触 (Tapered brush strokes)
+    - 动态骨骼姿势 (Dynamic rigging system)
+    - 简单的图层系统 (披风, 盔甲, 身体, 武器)
+
+    此文件主要尝试复现类似 Hollow Knight 的手绘质感，而非传统的像素艺术。
 """
 
 import cairo

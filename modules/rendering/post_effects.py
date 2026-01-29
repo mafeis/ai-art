@@ -4,7 +4,7 @@
 """
 
 from PIL import Image, ImageFilter, ImageEnhance, ImageDraw
-import texture_generator as tex
+from modules.rendering import texture_generator as tex
 import random
 
 

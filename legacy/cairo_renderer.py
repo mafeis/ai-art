@@ -1,6 +1,15 @@
 """
-基于 Cairo 的高质量游戏角色渲染器
-支持《死亡细胞》《空洞骑士》《纪念碑谷》风格
+模块名称: Cairo 矢量渲染器基类 (Cairo Renderer Base)
+文件用途:
+    提供基于 PyCairo 的 2D 矢量绘图基础类和特定风格实现。
+
+    包含以下类:
+    1. CairoCharacterRenderer: 基础渲染器，封装了常用的矢量绘图操作（画圆、圆角矩形、胶囊体、渐变等）。
+    2. DeadCellsRenderer: 《死亡细胞》风格渲染器，使用平滑渐变和动态身体曲线。
+    3. HollowKnightRenderer: 《空洞骑士》风格渲染器，特点是粗黑描边和手绘感。
+    4. MonumentValleyRenderer: 《纪念碑谷》风格渲染器，特点是极简几何和扁平配色。
+
+    此模块属于实验性质，旨在探索非像素风格的程序化生成。
 """
 
 import cairo

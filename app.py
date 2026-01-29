@@ -1,7 +1,29 @@
+"""
+模块名称: 应用入口 (Application Entry Point)
+文件路径: app.py
+
+文件作用:
+    这是整个 Web 应用程序的入口文件，基于 Flask 框架构建。
+    它负责处理所有的 HTTP 请求，路由分发，以及连接前端页面与后端生成逻辑。
+
+主要功能:
+    1. 启动 Flask 服务器。
+    2. 提供 Web 页面路由 ("/")。
+    3. 提供 API 接口：
+        - /options: 获取所有可用的角色部件、样式、主题配置。
+        - /config: 读取当前的配置文件。
+        - /randomize: 提供智能随机化逻辑，根据主题生成角色配置。
+        - /generate: 核心接口，接收配置参数，调用生成模块生成 GIF 和 Sprite Sheet。
+
+依赖模块:
+    - modules.character.generator: 核心角色生成逻辑。
+    - modules.character.definitions: 角色定义数据。
+"""
+
 from flask import Flask, render_template, jsonify, request, send_file
-import gen_character
+from modules.character import generator as gen_character
+from modules.character import definitions as defs
 import time  # For performance stats
-import character_definitions as defs
 import yaml
 import io
 import base64
@@ -9,7 +31,7 @@ import random
 
 app = Flask(__name__)
 
-CONFIG_PATH = "character_config.yaml"
+CONFIG_PATH = "config/character_config.yaml"
 
 
 @app.route("/")

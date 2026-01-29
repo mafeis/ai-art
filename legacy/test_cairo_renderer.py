@@ -1,8 +1,15 @@
 """
-测试 Cairo 渲染器 - 生成三种艺术风格的角色
+模块名称: Cairo 渲染器测试脚本 (Cairo Renderer Test)
+文件用途:
+    用于测试和展示 `cairo_renderer.py` 中三种不同艺术风格的渲染效果。
+
+    运行此脚本将生成三张 PNG 图片:
+    1. test_dead_cells.png (死亡细胞风格)
+    2. test_hollow_knight.png (空洞骑士风格)
+    3. test_monument_valley.png (纪念碑谷风格)
 """
 
-from cairo_renderer import (
+from .cairo_renderer import (
     DeadCellsRenderer,
     HollowKnightRenderer,
     MonumentValleyRenderer,
