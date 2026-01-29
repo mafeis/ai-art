@@ -148,6 +148,42 @@ class CharacterRenderer:
                 else:
                     draw.polygon(points, fill=base_color)
 
+            elif type_ == "ellipse":
+                # ("ellipse", (x, y, w, h), "color")
+                x, y, w, h = cmd[1]
+                base_color = self.provider.get_color(cmd[2])
+
+                sx, sy = x * scale, y * scale
+                sw, sh = w * scale, h * scale
+                x1, y1 = offset_x + sx, offset_y + sy
+
+                if is_hd:
+                    # HD mode: Subtle gradient or rim light simulation could go here
+                    # For now, just clean anti-aliased ellipse
+                    outline_color = self.provider.adjust_color(
+                        base_color, 0.8
+                    )  # Subtle outline
+                    draw.ellipse(
+                        [x1, y1, x1 + sw, y1 + sh], fill=base_color
+                    )  # Outline off for smoothness?
+                else:
+                    draw.ellipse([x1, y1, x1 + sw, y1 + sh], fill=base_color)
+
+            elif type_ == "circle":
+                # ("circle", (cx, cy, r), "color")
+                cx, cy, r = cmd[1]
+                base_color = self.provider.get_color(cmd[2])
+
+                scx, scy = cx * scale, cy * scale
+                sr = r * scale
+
+                x1 = offset_x + scx - sr
+                y1 = offset_y + scy - sr
+                x2 = offset_x + scx + sr
+                y2 = offset_y + scy + sr
+
+                draw.ellipse([x1, y1, x2, y2], fill=base_color)
+
     def _draw_part_rotated(
         self,
         canvas,

@@ -635,56 +635,59 @@
     <script>
         // --- 汉化字典 (Simplified Translation Map) ---
         const TRANSLATIONS = {
-            // UI Labels
-            generating: "正在绘制...",
-            download_png: "保存图片",
-            toast_batch: "生成完毕",
-            
             // Categories
             parts: {
-                head: "头部样式", hair: "发型", eyes: "眼部特征", 
-                body: "躯干服饰", legs: "下肢/鞋履", back: "背部装饰", held: "手持道具"
+                head: "基础脸型", hair: "发型设计", eyes: "眼神特征", expression: "面部表情", face_wear: "面部饰品",
+                body: "上身服饰", legs: "下身/鞋履", back: "背部挂件", held: "手持道具"
             },
             palette: {
                 skin: "皮肤色调", hair: "头发颜色", shirt: "上装主色", 
                 pants: "下装颜色", boots: "鞋履颜色", eye_color: "瞳孔颜色", 
-                metal: "金属材质", highlight: "高光色", outline: "轮廓线",
-                leather: "皮革色", gold: "金色", neon_blue: "霓虹蓝", neon_pink: "霓虹粉"
+                outline: "轮廓线条"
             },
-            // Options (Detailed)
-            options: {
-                none: "无 / 默认", 
-                // Heads
-                human: "人类标准脸", elf: "精灵脸(尖耳)", orc: "兽人脸(獠牙)", dwarf: "矮人脸", 
-                skeleton: "骷髅头骨", robot: "机械头", pumpkin: "南瓜头", sage_beard: "长须智者", 
-                cyborg_eye: "半机械改造", zombie: "丧尸脸", gas_mask: "防毒面具", oni: "般若鬼面",
-                // Hair
-                bald: "光头", short: "干练短发", long: "披肩长发", mohawk: "莫霍克发型", ponytail: "马尾辫",
-                afro: "爆炸头", wizard_hat: "法师尖帽", hood: "潜行者兜帽", bandana: "海盗头巾",
-                topknot: "道士发髻", long_flowy: "仙侠飘逸长发", helmet: "重装头盔", mohawk_neon: "赛博霓虹发光",
-                top_hat: "绅士高帽", brain_exposed: "大脑外露",
-                // Eyes
-                normal: "正常眼神", sunglasses: "黑客墨镜", cyclops: "独眼巨人", visipatch: "战术目镜",
-                glowing: "能量发光", tired: "疲惫黑眼圈", goggles: "蒸汽护目镜",
-                // Body
-                shirt: "基础衬衫", armor: "板甲", robe: "长袍/法衣", jacket: "夹克", ribs: "肋骨外露",
-                suit: "西装", overalls: "工装背带裤", hanfu_scholar: "儒雅汉服", hanfu_warrior: "武侠劲装",
-                mech_suit: "动力机甲", jacket_neon: "霓虹夹克", coat_brass: "黄铜大衣", ribs_gore: "血腥肋骨",
-                // Legs
-                pants: "长裤", skirt: "短裙", shorts: "短裤", peg_leg: "海盗木腿", boots_high: "高筒皮靴",
-                robot_legs: "机械义肢",
-                // Back
-                cape: "英雄披风", wings: "天使羽翼", backpack: "冒险背包", jetpack: "喷气背包",
-                flying_swords: "御剑飞行", coffin: "吸血鬼棺材",
-                // Held
-                sword: "铁剑", staff: "法杖", axe: "战斧", shield: "鸢盾",
-                jian: "青锋剑", fan: "折扇", gourd: "酒葫芦", laser_gun: "激光步枪",
-                katana_laser: "光束武士刀", wrench: "巨型扳手", chainsaw: "电锯", butcher_knife: "杀猪刀",
-                // Actions
-                idle: "待机呼吸", walk: "行走", attack: "攻击动作", jump: "跳跃",
-                run: "奔跑冲刺", hurt: "受击/击退", die: "死亡倒地", cheer: "胜利欢呼"
-            }
+            
+            // Options (New Pixel-Perfect Keys)
+            // Head
+            base: "标准萌脸",
+            
+            // Hair
+            short_hero: "勇者短发", long_straight: "黑长直", twin_tails: "傲娇双马尾",
+            messy_shag: "凌乱碎发", bob: "波波头",
+            
+            // Eyes
+            anime_large: "二次元大眼", sharp_focus: "锐利眼神", gentle_droop: "温柔下垂眼",
+            cat_eye: "猫瞳",
+            
+            // Expression
+            neutral: "平静", smile: "微笑", pout: "嘟嘴生气", surprised: "惊讶",
+            
+            // Face Wear
+            none: "无", glasses_red: "赤框眼镜", bandage: "脸颊创贴", cat_ears_headset: "猫耳耳机",
+            
+            // Body
+            adventurer_coat: "冒险家外套", school_uniform: "学院制服", maid_dress: "女仆装",
+            cyber_vest: "赛博背心", wizard_robe: "魔导长袍",
+            
+            // Legs
+            pants_boots: "长裤战靴", skirt_socks: "短裙过膝袜", boots_shorts: "短裤皮靴",
+            armored_legs: "重甲护腿",
+            
+            // Held
+            sword_iron: "铁剑", staff_magic: "魔法杖", book_spell: "魔导书",
+            shield_round: "圆盾", tea_cup: "奶茶",
+            
+            // Back
+            cape_hero: "英雄披风", wings_angel: "天使之翼", backpack_travel: "旅行背包",
+            
+            // Themes
+            generic: "通用风格", fantasy: "奇幻冒险", scifi: "赛博科幻",
+            modern: "现代都市", horror: "暗黑哥特", cute: "Q版萌系",
+            
+            // Actions
+            idle: "待机呼吸", walk: "行走", attack: "攻击动作", jump: "跳跃",
+            run: "奔跑冲刺", hurt: "受击/击退", die: "死亡倒地", cheer: "胜利欢呼",
         };
+
 
         function getLabel(category, key) {
             // 1. Try exact match in options
@@ -898,7 +901,7 @@
                 
                 // [Crucial Fix] Ensure the selected value exists in options
                 let val = currentConfig.parts[part];
-                if (!styles.includes(val)) {
+                if (!val || !styles.includes(val)) {
                     val = styles[0];
                     currentConfig.parts[part] = val;
                 }

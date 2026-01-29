@@ -196,26 +196,33 @@ class CharacterComposer:
                 ay = (self.base_offset_y * scale) + s(17) + bob
                 ax_base = offset_x + (self.base_offset_x * scale) + global_x_off
 
-                is_hd = (render_mode == "hd") and (scale >= 4.0)
-                is_sketch = render_mode == "sketch"
+                # [Hi-Bit Arm Refinement]
+                # Instead of one big rect, draw main arm + shadow/highlight
 
-                rect_func = draw.rectangle
-                kwargs = {"fill": color}
+                # Helper to draw detailed pixel arm
+                def draw_pixel_arm(rect_coords):
+                    x1, y1, x2, y2 = rect_coords
+                    w = x2 - x1
+                    h = y2 - y1
 
-                if is_hd:
-                    radius = scale * 0.4
-                    outline_color = self.adjust_color(color, 0.6)
-                    kwargs = {
-                        "radius": radius,
-                        "fill": color,
-                        "outline": outline_color,
-                        "width": int(max(1, scale * 0.15)),
-                    }
-                    rect_func = draw.rounded_rectangle
-                elif is_sketch:
-                    kwargs = {"fill": color, "outline": self.adjust_color(color, 0.5)}
+                    # Main flesh/sleeve
+                    draw.rectangle([x1, y1, x2, y2], fill=color)
 
-                # Arm Procedural Drawing (Still handled here as it is not a static part definition)
+                    # Shadow (Right/Bottom edge)
+                    shadow_col = self.adjust_color(color, 0.7)
+                    if w > h:  # Horizontal arm
+                        draw.rectangle([x1, y2 - s(1), x2, y2], fill=shadow_col)
+                    else:  # Vertical arm
+                        draw.rectangle([x2 - s(1), y1, x2, y2], fill=shadow_col)
+
+                    # Highlight (Top/Left edge) - Subtle
+                    light_col = self.adjust_color(color, 1.1)
+                    if w > h:
+                        draw.rectangle([x1, y1, x2, y1 + s(0.5)], fill=light_col)
+                    else:
+                        draw.rectangle([x1, y1, x1 + s(0.5), y2], fill=light_col)
+
+                # Arm Coords (相对于 ax_base, ay)
                 l_rect = [ax_base + s(10), ay, ax_base + s(11), ay + s(6)]
                 r_rect = [ax_base + s(20), ay, ax_base + s(21), ay + s(6)]
 
@@ -245,8 +252,8 @@ class CharacterComposer:
                     ]  # Up high
                     l_rect = [ax_base + s(10), ay + s(1), ax_base + s(11), ay + s(6)]
 
-                rect_func(l_rect, **kwargs)
-                rect_func(r_rect, **kwargs)
+                draw_pixel_arm(l_rect)
+                draw_pixel_arm(r_rect)
 
             elif layer == "held":
                 style = self.selections.get("held", "none")
@@ -275,7 +282,7 @@ class CharacterComposer:
                         pivot_offset=pivot,
                     )
 
-            elif layer in ["body", "head", "eyes", "hair"]:
+            elif layer in ["body", "head", "eyes", "hair", "expression", "face_wear"]:
                 self.renderer.draw_part(
                     draw,
                     instructions,
@@ -350,9 +357,10 @@ def create_character_spritesheet(
     target_h = output_size
     target_w = int(target_h * (sheet_w / sheet_h))
 
-    resample_mode = (
-        Image.Resampling.LANCZOS if density >= 4.0 else Image.Resampling.NEAREST
-    )
+    # [Critical Fix] Always use NEAREST for that crisp pixel look.
+    # LANCZOS creates blur which ruins the "granular" pixel art aesthetic.
+    resample_mode = Image.Resampling.NEAREST
+
     img = img.resize((target_w, target_h), resample_mode)
 
     effect_func = post_effects.get_post_effect_for_mode(render_mode)
@@ -412,9 +420,8 @@ def create_character_gif(
 
         target_h = output_size
         target_w = int(target_h * (draw_w / draw_h))
-        resample_mode = (
-            Image.Resampling.LANCZOS if density >= 4.0 else Image.Resampling.NEAREST
-        )
+        # [Critical Fix] Always use NEAREST for GIFs too
+        resample_mode = Image.Resampling.NEAREST
         frame_img = frame_img.resize((target_w, target_h), resample_mode)
 
         effect_func = post_effects.get_post_effect_for_mode(render_mode)
