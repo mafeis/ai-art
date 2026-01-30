@@ -227,7 +227,8 @@ def generate_atlas():
         if not config:
             return jsonify({"error": "No config"}), 400
 
-        actions = ["idle", "walk", "run", "attack", "jump", "hurt", "die", "cheer"]
+        actions = ["idle", "walk", "attack", "jump", "hurt", "die"]
+
         sheets = []
         max_w = 0
         total_h = 0

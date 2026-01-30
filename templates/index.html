@@ -131,7 +131,7 @@
 
         .preview-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(2, 1fr); /* Force 2 rows */
             gap: 8px; 
             width: 100%;
@@ -142,7 +142,7 @@
 
         .preview-card-item {
             background: var(--surface);
-            padding: 4px;
+            padding: 12px;
             border-radius: var(--radius-sm);
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border);
@@ -176,6 +176,7 @@
             image-rendering: pixelated;
             object-fit: contain; /* Keep aspect ratio but fill box */
             transition: background-color 0.3s ease;
+            transform: scale(0.9); /* Slightly shrink to show full character context */
         }
 
         .mini-btn {
@@ -756,7 +757,8 @@
             
             // Actions
             idle: "待机呼吸", walk: "行走", attack: "攻击动作", jump: "跳跃",
-            run: "奔跑冲刺", hurt: "受击/击退", die: "死亡倒地", cheer: "胜利欢呼",
+            hurt: "受击/击退", die: "死亡倒地",
+
             
             // UI Labels
             generating: "正在生成像素...",
@@ -780,7 +782,8 @@
         let currentConfig = { 
             parts: {}, 
             palette: {}, 
-            actions: ["idle", "walk", "run", "attack", "jump", "hurt", "die", "cheer"], 
+            actions: ["idle", "walk", "attack", "jump", "hurt", "die"], 
+
             render_mode: "hibit",
             density: "8.0",
             output_size: "512" 
@@ -924,11 +927,13 @@
             if(!container) return;
             
             container.innerHTML = '';
-            const allActions = ["idle", "walk", "run", "attack", "jump", "hurt", "die", "cheer"];
+            const allActions = ["idle", "walk", "attack", "jump", "hurt", "die"];
+
             
             const grid = document.createElement('div');
             grid.style.display = 'grid';
-            grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+            grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+
             grid.style.gap = '8px';
             
             allActions.forEach(act => {

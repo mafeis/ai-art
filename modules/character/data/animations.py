@@ -17,14 +17,6 @@ ANIMATION_DEFINITIONS = {
         {"bob": 0, "leg_f": 0, "arm_f": 0, "offset_x": 0},
         {"bob": -1, "leg_f": 1, "arm_f": -1, "offset_x": 0},  # 另一只脚
     ],
-    "run": [
-        # 跑步：大幅度跳跃感(bob -3)，身体前倾(通过offset_x模拟冲刺感)
-        # 帧数减少以增加速度感
-        {"bob": -1, "leg_f": 1, "arm_f": -1, "offset_x": 2},  # 冲刺前倾
-        {"bob": -3, "leg_f": -2, "arm_f": 2, "offset_x": 0},  # 腾空，双腿大迈，手举高
-        {"bob": -1, "leg_f": -1, "arm_f": 1, "offset_x": 2},  # 落地前倾
-        {"bob": -3, "leg_f": 2, "arm_f": 2, "offset_x": 0},  # 腾空
-    ],
     "attack": [
         # 攻击：蓄力(后退) -> 突刺(大幅前进) -> 恢复
         # Frame 1: Wind up (Back -45 deg)
@@ -131,23 +123,29 @@ ANIMATION_DEFINITIONS = {
     "hurt": [
         # 受击：剧烈震动，向后击退
         {"bob": 0, "leg_f": 0, "arm_f": 0},
-        {"bob": -1, "leg_f": -1, "arm_f": 2, "offset_x": -4},  # 被打飞
-        {"bob": 1, "leg_f": -1, "arm_f": 2, "offset_x": -6},  # 继续后退
-        {"bob": 0, "leg_f": 0, "arm_f": 0, "offset_x": -3},  # 落地滑行
+        {"bob": -1, "leg_f": -1, "arm_f": 2, "offset_x": -8},  # 被打飞 (加大幅度)
+        {"bob": 1, "leg_f": -1, "arm_f": 2, "offset_x": -12},  # 继续后退 (加大幅度)
+        {"bob": 0, "leg_f": 0, "arm_f": 0, "offset_x": -6},  # 落地滑行
         {"bob": 0, "leg_f": 0, "arm_f": 0, "offset_x": 0},
     ],
-    "cheer": [
-        {"bob": 0, "leg_f": 0, "arm_f": 0},
-        {"bob": -2, "leg_f": 0, "arm_f": 2},  # 跳起欢呼
-        {"bob": 0, "leg_f": 0, "arm_f": 0},
-        {"bob": -2, "leg_f": 0, "arm_f": 2},
-    ],
     "die": [
-        {"bob": 0, "leg_f": 0, "arm_f": 0},
-        {"bob": -2, "leg_f": 0, "arm_f": 2, "offset_x": -2},  # 痛苦
-        {"bob": 4, "leg_f": -1, "arm_f": -1, "offset_x": -4},  # 倒下中
-        {"bob": 10, "leg_f": -2, "arm_f": 0, "offset_x": -6},  # 躺平 (bob正值是向下)
-        {"bob": 10, "leg_f": -2, "arm_f": 0, "offset_x": -6},  # 尸体帧
+        {"bob": 0, "leg_f": 0, "arm_f": 0, "body_rot": 0},
+        {
+            "bob": 0,
+            "leg_f": 0,
+            "arm_f": 2,
+            "offset_x": -2,
+            "body_rot": -20,
+        },  # Stumble back
+        {
+            "bob": 0,
+            "leg_f": -1,
+            "arm_f": -1,
+            "offset_x": -4,
+            "body_rot": -45,
+        },  # Falling (Pivot handles height)
+        {"bob": 0, "leg_f": -1, "arm_f": 0, "offset_x": -4, "body_rot": -90},  # Flat
+        {"bob": 0, "leg_f": -1, "arm_f": 0, "offset_x": -4, "body_rot": -90},  # Dead
     ],
 }
 

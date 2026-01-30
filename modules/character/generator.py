@@ -41,6 +41,20 @@ class CharacterComposer:
         self.renderer = CharacterRenderer(self)
 
     def get_color(self, key):
+        # [Enhancement] Support dynamic suffixes: _light, _dark, _shadow
+        if key.endswith("_light"):
+            base_key = key.replace("_light", "")
+            base_color = self.palette.get(base_key, (255, 0, 255))
+            return self.adjust_color(base_color, 1.2)
+        elif key.endswith("_dark"):
+            base_key = key.replace("_dark", "")
+            base_color = self.palette.get(base_key, (255, 0, 255))
+            return self.adjust_color(base_color, 0.8)
+        elif key.endswith("_shadow"):
+            base_key = key.replace("_shadow", "")
+            base_color = self.palette.get(base_key, (255, 0, 255))
+            return self.adjust_color(base_color, 0.6)
+
         return self.palette.get(key, (255, 0, 255))
 
     def adjust_color(self, color, factor):
@@ -79,7 +93,50 @@ class CharacterComposer:
         arm_frame = frame_config.get("arm_f", 0)
         global_x_off = frame_config.get("offset_x", 0) * scale
         rotation = frame_config.get("rot", 0)
+        body_rot = frame_config.get("body_rot", 0)
         vfx = frame_config.get("vfx", None)
+
+        # [Global Rotation Logic]
+        # If body_rot is set, we render the frame to a temp buffer, rotate it, and paste it back.
+        if body_rot != 0 and canvas:
+            # 1. Prepare temp canvas
+            w = int(self.width * scale)
+            h = int(self.height * scale)
+            temp_img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+            temp_draw = ImageDraw.Draw(temp_img)
+
+            # 2. Config for inner draw (remove body_rot to prevent recursion)
+            sub_config = frame_config.copy()
+            del sub_config["body_rot"]
+
+            # 3. Recursive call (Draw at 0,0 of temp canvas)
+            self.compose_frame(
+                temp_draw,
+                0,  # Offset 0 locally
+                sub_config,
+                scale,
+                render_mode,
+                canvas=temp_img,
+            )
+
+            # 4. Rotate
+            # NEAREST ensures pixel art look is preserved during rotation
+            # Pivot around the feet to avoid "flying" effect
+            # Feet position approx: base_offset_y (80) + 60 = 140
+            pivot_x = w // 2
+            pivot_y = (self.base_offset_y + 60) * scale
+
+            rotated = temp_img.rotate(
+                body_rot,
+                resample=Image.Resampling.NEAREST,
+                expand=False,
+                center=(pivot_x, pivot_y),
+            )
+
+            # 5. Paste back to global canvas
+            # offset_x is the global position in the spritesheet
+            canvas.alpha_composite(rotated, (int(offset_x), 0))
+            return
 
         # 应用全局居中偏移量
         current_base_x = offset_x + (self.base_offset_x * scale) + global_x_off
