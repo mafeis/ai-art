@@ -20,58 +20,77 @@ LAYER_ORDER = [
 ]
 
 PART_TAGS = {
-    "head": {"base": ["generic"]},
+    "head": {
+        "base": ["fantasy", "scifi", "modern", "cute", "action", "generic"],
+        "round_face": ["cute", "fantasy", "modern"],
+        "angular_hero": ["action", "fantasy", "scifi"],
+    },
     "hair": {
-        "short_hero": ["male", "generic"],
-        "long_straight": ["female", "generic"],
-        "twin_tails": ["female", "cute"],
-        "messy_shag": ["male", "action"],
-        "bob": ["female", "modern"],
+        "short_hero": ["action", "fantasy", "generic"],
+        "long_straight": ["cute", "fantasy", "modern"],
+        "twin_tails": ["cute", "fantasy"],
+        "messy_shag": ["action", "scifi"],
+        "bob": ["cute", "modern"],
+        "spiky": ["action", "scifi"],
+        "long_curly": ["cute", "fantasy"],
+        "topknot": ["fantasy", "action"],
+        "braided": ["fantasy", "cute"],
+        "bald": ["scifi", "action", "generic"],
     },
     "eyes": {
-        "anime_large": ["cute"],
-        "sharp_focus": ["cool"],
-        "gentle_droop": ["calm"],
-        "cat_eye": ["active"],
+        "anime_large": ["cute", "fantasy"],
+        "sharp_focus": ["action", "scifi"],
+        "gentle_droop": ["cute", "fantasy"],
+        "cat_eye": ["action", "scifi"],
     },
     "expression": {
-        "smile": ["happy"],
-        "pout": ["angry"],
-        "neutral": ["calm"],
-        "surprised": ["shock"],
+        "smile": ["cute", "fantasy", "modern"],
+        "pout": ["cute", "action"],
+        "neutral": ["generic", "fantasy", "scifi", "modern", "action"],
+        "surprised": ["cute", "fantasy"],
     },
     "face_wear": {
-        "none": ["generic"],
-        "glasses_red": ["smart"],
-        "bandage": ["action"],
-        "cat_ears_headset": ["cute"],
+        "none": ["generic", "fantasy", "scifi", "modern", "cute", "action"],
+        "glasses_red": ["scifi", "modern"],
+        "bandage": ["action", "scifi"],
+        "cat_ears_headset": ["cute", "scifi"],
     },
     "body": {
-        "adventurer_coat": ["fantasy"],
-        "school_uniform": ["modern"],
+        "adventurer_coat": ["fantasy", "action"],
+        "school_uniform": ["modern", "cute"],
         "maid_dress": ["cute"],
-        "cyber_vest": ["scifi"],
+        "cyber_vest": ["scifi", "action"],
         "wizard_robe": ["fantasy"],
+        "tactical_armor": ["scifi", "action"],
+        "casual_tee": ["modern", "cute"],
+        "leather_jacket": ["action", "scifi"],
+        "ball_gown": ["fantasy", "cute"],
     },
     "legs": {
         "boots_shorts": ["action"],
         "skirt_socks": ["cute"],
-        "pants_boots": ["generic"],
-        "armored_legs": ["fantasy"],
+        "pants_boots": ["generic", "fantasy", "action"],
+        "armored_legs": ["fantasy", "action"],
+        "armored_greaves": ["scifi", "fantasy"],
+        "dress_skirt": ["fantasy", "cute"],
     },
     "held": {
-        "sword_iron": ["action"],
+        "sword_iron": ["action", "fantasy"],
         "staff_magic": ["fantasy"],
-        "book_spell": ["smart"],
-        "shield_round": ["defense"],
+        "book_spell": ["fantasy", "modern"],
+        "shield_round": ["fantasy", "action"],
         "tea_cup": ["cute"],
+        "plasma_rifle": ["scifi", "action"],
+        "buster_sword": ["action", "fantasy"],
+        "katana": ["action", "scifi"],
+        "star_wand": ["cute", "fantasy"],
         "none": ["generic"],
     },
     "back": {
         "none": ["generic"],
-        "cape_hero": ["fantasy"],
-        "wings_angel": ["fantasy"],
-        "backpack_travel": ["modern"],
+        "cape_hero": ["fantasy", "action"],
+        "wings_angel": ["fantasy", "cute"],
+        "backpack_travel": ["modern", "action"],
     },
 }
 
@@ -99,6 +118,43 @@ PART_DEFINITIONS = {
             ("rect", (16, 22, 2, 2), "outline"),  # Inner
             ("rect", (46, 20, 4, 6), "skin"),
             ("rect", (46, 22, 2, 2), "outline"),
+        ],
+        "round_face": [
+            # Rounder, softer face shape
+            ("rect", (18, 12, 28, 22), "skin"),
+            ("rect", (20, 10, 24, 2), "skin"),
+            ("rect", (22, 8, 20, 2), "skin"),
+            ("rect", (16, 14, 2, 18), "skin"),
+            ("rect", (46, 14, 2, 18), "skin"),
+            # Cheeks (full width blush)
+            ("rect", (16, 24, 6, 4), "highlight"),
+            ("rect", (42, 24, 6, 4), "highlight"),
+            # Round chin
+            ("rect", (22, 34, 20, 2), "skin"),
+            ("rect", (24, 36, 16, 2), "skin"),
+            ("rect", (26, 38, 12, 2), "skin"),
+            # Ears
+            ("rect", (12, 20, 4, 6), "skin"),
+            ("rect", (48, 20, 4, 6), "skin"),
+        ],
+        "angular_hero": [
+            # Sharp, heroic face
+            ("rect", (20, 10, 24, 24), "skin"),
+            ("rect", (22, 8, 20, 2), "skin"),
+            ("rect", (24, 6, 16, 2), "skin"),
+            ("rect", (18, 12, 2, 20), "skin"),
+            ("rect", (44, 12, 2, 20), "skin"),
+            # Strong jaw
+            ("rect", (20, 34, 24, 2), "skin"),
+            ("rect", (22, 36, 20, 2), "skin"),
+            ("rect", (24, 38, 16, 2), "skin"),
+            ("rect", (26, 40, 12, 2), "skin"),
+            # Brow ridge
+            ("rect", (20, 14, 8, 2), "outline"),
+            ("rect", (36, 14, 8, 2), "outline"),
+            # Ears
+            ("rect", (14, 18, 4, 8), "skin"),
+            ("rect", (46, 18, 4, 8), "skin"),
         ],
     },
     "eyes": {
@@ -229,6 +285,62 @@ PART_DEFINITIONS = {
             ("rect", (42, 24, 4, 2), "hair"),
             ("rect", (20, 14, 24, 10), "skin"),  # Face cutout
         ],
+        "spiky": [
+            # Aggressive spiky hair
+            ("rect", (16, 6, 32, 10), "hair"),
+            ("rect", (20, 2, 4, 4), "hair"),
+            ("rect", (28, 0, 4, 6), "hair"),
+            ("rect", (36, 2, 4, 4), "hair"),
+            ("rect", (44, 4, 4, 2), "hair"),
+            ("rect", (12, 8, 4, 6), "hair"),
+            ("rect", (48, 8, 4, 6), "hair"),
+            ("rect", (18, 12, 6, 6), "hair"),
+            ("rect", (40, 12, 6, 6), "hair"),
+        ],
+        "long_curly": [
+            ("rect", (16, 4, 32, 12), "hair"),
+            ("rect", (20, 6, 24, 2), "highlight"),
+            # Curly sides
+            ("rect", (12, 12, 6, 20), "hair"),
+            ("rect", (46, 12, 6, 20), "hair"),
+            ("rect", (10, 16, 4, 12), "hair"),
+            ("rect", (50, 16, 4, 12), "hair"),
+            # Back curls
+            ("rect", (18, 16, 28, 16), "hair"),
+            ("rect", (22, 20, 4, 4), "highlight"),
+            ("rect", (38, 20, 4, 4), "highlight"),
+        ],
+        "topknot": [
+            ("rect", (16, 8, 32, 10), "hair"),
+            ("rect", (28, 0, 8, 8), "hair"),
+            ("rect", (30, -2, 4, 4), "hair"),
+            ("rect", (18, 14, 6, 6), "hair"),
+            ("rect", (40, 14, 6, 6), "hair"),
+            ("rect", (14, 16, 4, 6), "hair"),
+            ("rect", (46, 16, 4, 6), "hair"),
+        ],
+        "braided": [
+            ("rect", (16, 4, 32, 12), "hair"),
+            ("rect", (20, 6, 24, 2), "highlight"),
+            # Left braid
+            ("rect", (10, 12, 6, 4), "hair"),
+            ("rect", (8, 16, 8, 4), "hair"),
+            ("rect", (6, 20, 10, 4), "hair"),
+            ("rect", (8, 24, 8, 4), "hair"),
+            ("rect", (10, 28, 6, 4), "hair"),
+            # Right braid
+            ("rect", (48, 12, 6, 4), "hair"),
+            ("rect", (48, 16, 8, 4), "hair"),
+            ("rect", (48, 20, 10, 4), "hair"),
+            ("rect", (48, 24, 8, 4), "hair"),
+            ("rect", (48, 28, 6, 4), "hair"),
+        ],
+        "bald": [
+            # Minimal hair - just shine
+            ("rect", (24, 6, 16, 2), "highlight"),
+            ("pixel", (22, 8), "highlight"),
+            ("pixel", (40, 8), "highlight"),
+        ],
     },
     "body": {
         "adventurer_coat": [
@@ -266,6 +378,38 @@ PART_DEFINITIONS = {
             ("rect", (26, 32, 12, 28), "highlight"),
             ("rect", (20, 32, 24, 6), "gold"),
         ],
+        "tactical_armor": [
+            ("rect", (20, 32, 24, 18), "metal"),
+            ("rect", (22, 34, 20, 2), "neon_blue"),
+            ("rect", (22, 40, 20, 2), "neon_blue"),
+            ("rect", (28, 36, 8, 8), "black"),  # Core
+            ("rect", (16, 32, 4, 10), "metal"),  # Shoulder L
+            ("rect", (44, 32, 4, 10), "metal"),  # Shoulder R
+            ("rect", (20, 48, 24, 2), "outline"),
+        ],
+        "casual_tee": [
+            ("rect", (20, 32, 24, 16), "shirt"),
+            ("rect", (28, 32, 8, 4), "highlight"),  # Collar
+            ("rect", (20, 48, 24, 2), "outline"),
+            ("rect", (14, 32, 6, 8), "shirt"),  # Short sleeve L
+            ("rect", (44, 32, 6, 8), "shirt"),  # Short sleeve R
+        ],
+        "leather_jacket": [
+            ("rect", (20, 32, 24, 18), "leather"),
+            ("rect", (22, 34, 20, 2), "outline"),  # Zipper
+            ("rect", (20, 46, 24, 4), "leather"),  # Waist
+            ("rect", (16, 32, 4, 10), "leather"),  # Collar L
+            ("rect", (44, 32, 4, 10), "leather"),  # Collar R
+            ("rect", (28, 38, 8, 6), "highlight"),  # Inner shirt peek
+        ],
+        "ball_gown": [
+            ("rect", (20, 32, 24, 12), "shirt"),
+            ("rect", (14, 44, 36, 16), "shirt"),  # Flared skirt
+            ("rect", (18, 44, 28, 2), "highlight"),  # Ribbon
+            ("rect", (28, 32, 8, 4), "gold"),  # Bodice detail
+            ("rect", (16, 32, 4, 8), "shirt"),  # Puff sleeve L
+            ("rect", (44, 32, 4, 8), "shirt"),  # Puff sleeve R
+        ],
     },
     "legs": {
         "pants_boots": [
@@ -288,6 +432,19 @@ PART_DEFINITIONS = {
             ("rect", (2, 0, 8, 10), "metal"),
             ("rect", (4, 4, 4, 4), "highlight"),
             ("rect", (0, 10, 10, 8), "metal"),
+        ],
+        "armored_greaves": [
+            ("rect", (2, 0, 8, 12), "metal"),
+            ("rect", (4, 2, 4, 2), "neon_blue"),
+            ("rect", (4, 8, 4, 2), "neon_blue"),
+            ("rect", (0, 12, 10, 6), "metal"),
+            ("rect", (2, 14, 6, 2), "highlight"),
+        ],
+        "dress_skirt": [
+            ("rect", (0, 0, 12, 16), "pants"),  # Long skirt
+            ("rect", (-2, 0, 16, 4), "highlight"),  # Hem frill
+            ("rect", (2, 16, 6, 4), "skin"),
+            ("rect", (2, 20, 6, 2), "boots"),
         ],
     },
     "held": {
@@ -316,6 +473,30 @@ PART_DEFINITIONS = {
             ("rect", (0, 0, 12, 16), "white"),
             ("pixel", (4, 6), "outline"),
             ("rect", (4, -6, 2, 6), "black"),
+        ],
+        "plasma_rifle": [
+            ("rect", (-4, -12, 20, 8), "metal"),
+            ("rect", (-4, -4, 20, 4), "black"),
+            ("rect", (14, -10, 6, 6), "neon_blue"),
+            ("rect", (-4, -12, 20, 2), "highlight"),
+        ],
+        "buster_sword": [
+            ("rect", (0, -24, 8, 44), "metal"),
+            ("rect", (2, -24, 4, 44), "highlight"),
+            ("rect", (-4, 20, 16, 4), "gold"),
+            ("rect", (-2, 24, 8, 8), "wood"),
+        ],
+        "katana": [
+            ("rect", (0, -22, 4, 40), "metal"),
+            ("rect", (1, -22, 2, 40), "highlight"),
+            ("rect", (-2, 18, 8, 4), "gold"),
+            ("rect", (0, 22, 4, 6), "wood"),
+        ],
+        "star_wand": [
+            ("rect", (0, -16, 4, 32), "wood"),
+            ("rect", (-6, -20, 16, 16), "gold"),
+            ("rect", (-4, -18, 12, 12), "neon_blue"),
+            ("pixel", (2, -14), "white"),
         ],
         "none": [],
     },

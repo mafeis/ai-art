@@ -3,79 +3,72 @@
 
 # Theme-specific Default Palettes (Overrides random generation)
 THEME_PALETTES = {
-    "xianxia": {
-        "hair": (20, 20, 20),  # Ink Black
+    "fantasy": {
+        "hair": (80, 40, 20),  # Warm brown
         "shirt": (230, 240, 255),  # White/Cyan Robe
         "pants": (50, 70, 90),  # Dark Blue
-        "boots": (30, 30, 30),
+        "boots": (80, 50, 20),
         "skin": (255, 235, 220),  # Fair
-        "eye_color": (0, 0, 0),
+        "eye_color": (0, 100, 180),
         "metal": (200, 200, 210),  # Silver
         "outline": (40, 50, 60),  # Ink Outline
+        "gold": (255, 215, 0),
+        "leather": (120, 70, 30),
     },
-    "cyberpunk": {
-        "hair": (255, 0, 128),  # Neon Pink
+    "scifi": {
+        "hair": (200, 200, 220),  # White/Grey
         "shirt": (20, 20, 25),  # Black Jacket
         "pants": (40, 40, 50),
-        "boots": (0, 255, 255),  # Cyan Boots
+        "boots": (0, 200, 200),  # Cyan Boots
         "skin": (220, 220, 255),  # Pale/Synth
         "eye_color": (0, 255, 0),  # Green LED
         "metal": (100, 100, 110),  # Chrome
         "neon_pink": (255, 0, 128),
-        "neon_blue": (0, 255, 255),
+        "neon_blue": (0, 200, 255),
         "outline": (0, 20, 40),
     },
-    "horror": {
-        "hair": (50, 50, 50),  # Grey/Dead
-        "shirt": (80, 0, 0),  # Blood Red
-        "pants": (30, 30, 30),
-        "boots": (20, 10, 10),
-        "skin": (150, 160, 140),  # Rotting Green/Grey
-        "eye_color": (255, 0, 0),  # Red Eyes
-        "blood": (180, 0, 0),
-        "zombie_skin": (100, 120, 100),
-        "outline": (20, 0, 0),
-    },
-    "steampunk": {
-        "hair": (100, 60, 20),  # Brown
-        "shirt": (200, 180, 150),  # Beige
-        "pants": (80, 50, 30),  # Leather
-        "boots": (60, 40, 20),
-        "skin": (240, 200, 160),
-        "brass": (200, 150, 50),
-        "leather": (120, 70, 30),
-        "metal": (160, 140, 100),  # Bronze-ish
-        "outline": (60, 40, 20),
-    },
-    "tech": {
-        "hair": (200, 200, 200),  # White/Grey
-        "shirt": (220, 220, 230),  # Lab coat white
+    "modern": {
+        "hair": (30, 20, 10),  # Dark brown/black
+        "shirt": (255, 255, 255),  # White
         "pants": (50, 50, 60),
-        "boots": (200, 200, 200),
+        "boots": (100, 80, 60),
         "skin": (255, 220, 180),
-        "eye_color": (0, 100, 255),
+        "eye_color": (80, 60, 40),
         "metal": (180, 190, 200),
         "outline": (50, 60, 70),
+        "leather": (100, 60, 30),
     },
-    "western": {
-        "hair": (180, 140, 50),  # Blonde
-        "shirt": (150, 150, 160),  # Chainmail
-        "pants": (80, 60, 40),
-        "boots": (100, 60, 20),
-        "skin": (255, 210, 170),
+    "cute": {
+        "hair": (255, 180, 200),  # Pink
+        "shirt": (255, 220, 230),  # Light pink
+        "pants": (255, 240, 245),
+        "boots": (255, 200, 220),
+        "skin": (255, 230, 220),  # Rosy
+        "eye_color": (180, 100, 150),
+        "metal": (220, 220, 230),
+        "outline": (200, 150, 170),
+        "gold": (255, 215, 0),
+    },
+    "action": {
+        "hair": (255, 100, 50),  # Orange/Red
+        "shirt": (60, 60, 70),  # Dark grey
+        "pants": (40, 40, 50),
+        "boots": (80, 60, 40),
+        "skin": (220, 180, 150),
+        "eye_color": (200, 50, 50),
         "metal": (160, 170, 180),  # Steel
         "outline": (30, 30, 30),
+        "leather": (100, 50, 20),
     },
 }
 
 # Theme-specific Recommended Render Modes
 THEME_RENDER_MODES = {
-    "xianxia": "ink",
-    "cyberpunk": "neon",
-    "horror": "sketch",
-    "steampunk": "retro",
-    "tech": "hd",
-    "western": "retro",
+    "fantasy": "ink",
+    "scifi": "neon",
+    "modern": "hd",
+    "cute": "premium",
+    "action": "retro",
 }
 
 # Expanded Palette with theme colors
@@ -103,13 +96,13 @@ DEFAULT_PALETTE = {
     "zombie_skin": (100, 130, 100),
     "jade": (0, 160, 100),
     "gold": (255, 215, 0),
+    "red": (200, 50, 50),
 }
 
 THEME_MAPPINGS = {
-    "xianxia": [],
-    "tech": [],
-    "western": [],
-    "cyberpunk": [],
-    "steampunk": [],
-    "horror": [],
+    "fantasy": ["adventurer_coat", "wizard_robe", "cape_hero", "wings_angel", "staff_magic", "sword_iron", "round_face", "long_straight", "braided", "ball_gown", "dress_skirt", "star_wand"],
+    "scifi": ["cyber_vest", "tactical_armor", "plasma_rifle", "shield_round", "spiky", "messy_shag", "katana", "angular_hero", "armored_greaves"],
+    "modern": ["school_uniform", "casual_tee", "backpack_travel", "book_spell", "bob", "long_straight", "glasses_red"],
+    "cute": ["maid_dress", "ball_gown", "tea_cup", "twin_tails", "braided", "long_curly", "round_face", "dress_skirt", "star_wand", "topknot"],
+    "action": ["tactical_armor", "leather_jacket", "spiky", "messy_shag", "buster_sword", "katana", "angular_hero", "armored_legs", "armored_greaves", "boots_shorts"],
 }

@@ -244,6 +244,7 @@ class HiBitRenderer(Renderer):
         is_metal = color_key in ["metal", "gold", "brass", "sword", "shield"]
         is_skin = color_key in ["skin", "elf", "highlight"]  # highlight通常是皮肤高光
         is_hair = color_key in ["hair"]
+        is_cloth = color_key in ["shirt", "pants", "boots", "wood", "leather", "cloth"]
 
         # === 高级密度细节处理 (Sub-pixel Detailing) ===
         # 只有在高清/超清模式 (scale >= 3) 下才启用，让"大颗粒"变成"细腻材质"

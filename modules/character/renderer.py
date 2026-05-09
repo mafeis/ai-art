@@ -34,8 +34,15 @@ class CharacterRenderer:
                 if is_stroke:
                     # Stroke logic (used for shield rim)
                     outline_width = int(max(1, scale * 0.1))
+                    rx1, ry1 = x1, y1
+                    rx2, ry2 = x1 + sw, y1 + sh
+                    # Normalize so x2>=x1 and y2>=y1 (PIL requirement)
+                    if rx2 < rx1:
+                        rx1, rx2 = rx2, rx1
+                    if ry2 < ry1:
+                        ry1, ry2 = ry2, ry1
                     draw.rectangle(
-                        [x1, y1, x1 + sw, y1 + sh],
+                        [rx1, ry1, rx2, ry2],
                         outline=base_color,
                         width=outline_width,
                     )

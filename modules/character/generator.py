@@ -63,6 +63,29 @@ class CharacterComposer:
             return (r, g, b, a)
         return (r, g, b)
 
+    def _calc_hand_position(self, hand_x_base, hand_y_base, arm_frame, bob, scale):
+        """Calculate hand/wrist position based on arm_frame. Shared by arm_front and hand_front."""
+        def s(v):
+            return int(v * scale)
+        wp_x = s(hand_x_base)
+        wp_y = s(hand_y_base) + bob
+        if arm_frame == 1:
+            wp_x += s(4)
+            wp_y += s(6)
+        elif arm_frame == -1:
+            wp_x += s(2)
+            wp_y += s(8)
+        elif arm_frame == 2:
+            wp_x += s(8)
+            wp_y -= s(4)
+        elif arm_frame == 3:
+            wp_x += s(16)
+            wp_y -= s(8)
+        elif arm_frame == 4:
+            wp_x += s(12)
+            wp_y -= s(12)
+        return wp_x, wp_y
+
     def compose_frame(
         self,
         draw,
@@ -166,7 +189,7 @@ class CharacterComposer:
                     draw,
                     instructions,
                     current_base_x + lx,
-                    current_base_y + s(48) - bob + (ly - s(48)) + bob,  # Base y 48
+                    current_base_y + ly,  # bob cancels out
                     scale,
                     render_mode,
                     canvas=canvas,
@@ -245,26 +268,7 @@ class CharacterComposer:
                 shoulder_y = current_base_y + s(34)
 
                 # 关键：手腕位置必须与武器位置同步
-                # 武器位置是 final_hand_x, final_hand_y
-                # 我们需要重新计算一遍武器位置 logic (有点重复，但为了解耦先这样写)
-
-                wp_x, wp_y = s(hand_x_base), s(hand_y_base) + bob
-                # Apply arm_frame offsets (Same as compose_frame logic)
-                if arm_frame == 1:
-                    wp_x += s(4)
-                    wp_y += s(6)
-                elif arm_frame == -1:
-                    wp_x += s(2)
-                    wp_y += s(8)
-                elif arm_frame == 2:
-                    wp_x += s(8)
-                    wp_y -= s(4)
-                elif arm_frame == 3:
-                    wp_x += s(16)
-                    wp_y -= s(8)
-                elif arm_frame == 4:
-                    wp_x += s(12)
-                    wp_y -= s(12)
+                wp_x, wp_y = self._calc_hand_position(hand_x_base, hand_y_base, arm_frame, bob, scale)
 
                 final_wrist_x = (
                     offset_x + (self.base_offset_x * scale) + global_x_off + wp_x
@@ -288,22 +292,7 @@ class CharacterComposer:
             elif layer == "hand_front":
                 # 绘制握住武器的手 (Fist)
                 # 坐标同 arm_front 的 wrist
-                wp_x, wp_y = s(hand_x_base), s(hand_y_base) + bob
-                if arm_frame == 1:
-                    wp_x += s(4)
-                    wp_y += s(6)
-                elif arm_frame == -1:
-                    wp_x += s(2)
-                    wp_y += s(8)
-                elif arm_frame == 2:
-                    wp_x += s(8)
-                    wp_y -= s(4)
-                elif arm_frame == 3:
-                    wp_x += s(16)
-                    wp_y -= s(8)
-                elif arm_frame == 4:
-                    wp_x += s(12)
-                    wp_y -= s(12)
+                wp_x, wp_y = self._calc_hand_position(hand_x_base, hand_y_base, arm_frame, bob, scale)
 
                 cx = offset_x + (self.base_offset_x * scale) + global_x_off + wp_x
                 cy = (self.base_offset_y * scale) + wp_y

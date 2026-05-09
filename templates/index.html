@@ -495,12 +495,11 @@
                     <div class="select-wrapper">
                         <select id="theme-select">
                             <option value="all">🎲 混合风格</option>
-                            <option value="xianxia">🏔️ 仙侠 / 古风</option>
-                            <option value="tech">🦾 未来科技</option>
-                            <option value="western">🏰 西方魔幻</option>
-                            <option value="cyberpunk">🌃 赛博朋克</option>
-                            <option value="steampunk">⚙️ 蒸汽朋克</option>
-                            <option value="horror">👻 恐怖 / 丧尸</option>
+                            <option value="fantasy">🏰 奇幻冒险</option>
+                            <option value="scifi">🦾 赛博科幻</option>
+                            <option value="modern">🏙️ 现代都市</option>
+                            <option value="cute">🌸 Q版萌系</option>
+                            <option value="action">⚔️ 战斗动作</option>
                         </select>
                         <svg class="select-icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
                     </div>
@@ -638,52 +637,60 @@
                 body: "上身服饰", legs: "下身/鞋履", back: "背部挂件", held: "手持道具"
             },
             palette: {
-                skin: "皮肤色调", hair: "头发颜色", shirt: "上装主色", 
-                pants: "下装颜色", boots: "鞋履颜色", eye_color: "瞳孔颜色", 
-                outline: "轮廓线条"
+                skin: "皮肤色调", hair: "头发颜色", shirt: "上装主色",
+                pants: "下装颜色", boots: "鞋履颜色", eye_color: "瞳孔颜色",
+                outline: "轮廓线条", metal: "金属光泽", highlight: "高光色",
+                gold: "金色", leather: "皮革色", neon_blue: "霓虹蓝",
+                brass: "黄铜色", blood: "血色", white: "白色", black: "黑色"
             },
-            
-            // Options (New Pixel-Perfect Keys)
+
             // Head
-            base: "标准萌脸",
-            
+            base: "标准萌脸", round_face: "圆润脸型", angular_hero: "英气棱角",
+
             // Hair
             short_hero: "勇者短发", long_straight: "黑长直", twin_tails: "傲娇双马尾",
             messy_shag: "凌乱碎发", bob: "波波头",
-            
+            spiky: "尖刺冲头", long_curly: "波浪卷发", topknot: "武士发髻",
+            braided: "编发双辫", bald: "光头",
+
             // Eyes
             anime_large: "二次元大眼", sharp_focus: "锐利眼神", gentle_droop: "温柔下垂眼",
             cat_eye: "猫瞳",
-            
+
             // Expression
             neutral: "平静", smile: "微笑", pout: "嘟嘴生气", surprised: "惊讶",
-            
+
             // Face Wear
             none: "无", glasses_red: "赤框眼镜", bandage: "脸颊创贴", cat_ears_headset: "猫耳耳机",
-            
+
             // Body
             adventurer_coat: "冒险家外套", school_uniform: "学院制服", maid_dress: "女仆装",
             cyber_vest: "赛博背心", wizard_robe: "魔导长袍",
-            
+            tactical_armor: "战术护甲", casual_tee: "休闲T恤", leather_jacket: "皮夹克",
+            ball_gown: "华丽礼服",
+
             // Legs
             pants_boots: "长裤战靴", skirt_socks: "短裙过膝袜", boots_shorts: "短裤皮靴",
-            armored_legs: "重甲护腿",
-            
+            armored_legs: "重甲护腿", armored_greaves: "机械护胫", dress_skirt: "长裙",
+
             // Held
             sword_iron: "铁剑", staff_magic: "魔法杖", book_spell: "魔导书",
             shield_round: "圆盾", tea_cup: "奶茶",
-            
+            plasma_rifle: "等离子枪", buster_sword: "巨剑", katana: "武士刀",
+            star_wand: "星之魔杖",
+
             // Back
             cape_hero: "英雄披风", wings_angel: "天使之翼", backpack_travel: "旅行背包",
-            
+
             // Themes
             generic: "通用风格", fantasy: "奇幻冒险", scifi: "赛博科幻",
-            modern: "现代都市", horror: "暗黑哥特", cute: "Q版萌系",
-            
+            modern: "现代都市", cute: "Q版萌系", action: "战斗动作",
+
             // Actions
             idle: "待机呼吸", walk: "行走", attack: "攻击动作", jump: "跳跃",
             run: "奔跑冲刺", hurt: "受击/击退", die: "死亡倒地", cheer: "胜利欢呼",
-            
+            attack_shoot: "射击", attack_cast: "施法", attack_heavy: "重击",
+
             // UI Labels
             generating: "正在生成像素...",
             download_png: "下载超清原图",

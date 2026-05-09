@@ -87,8 +87,11 @@ def randomize():
     ]
     if theme == "all":
         selected_theme = random.choice(available_themes)
-    else:
+    elif theme in available_themes:
         selected_theme = theme
+    else:
+        # Invalid theme - fall back to random
+        selected_theme = random.choice(available_themes)
 
     # 2. Theme Tags Strategy
     # Primary tag is the theme itself. Secondary tags are compatible ones.
@@ -219,6 +222,34 @@ def generate_image():
         config = request.json
         if not config:
             return jsonify({"error": "No config provided"}), 400
+
+        # Validate required fields
+        if "parts" not in config:
+            return jsonify({"error": "Missing 'parts' in config"}), 400
+
+        # Validate parts keys
+        valid_parts = set(defs.PART_DEFINITIONS.keys())
+        for part, style in config["parts"].items():
+            if part not in valid_parts:
+                return jsonify({"error": f"Invalid part: {part}"}), 400
+            if style not in defs.PART_DEFINITIONS[part]:
+                return jsonify({"error": f"Invalid style '{style}' for part '{part}'"}), 400
+
+        # Validate render_mode
+        valid_modes = ["retro", "hd", "sketch", "neon", "ink", "hibit", "premium"]
+        render_mode = config.get("render_mode", "retro")
+        if render_mode not in valid_modes:
+            return jsonify({"error": f"Invalid render_mode. Must be one of: {valid_modes}"}), 400
+
+        # Validate density
+        density = float(config.get("density", 1.0))
+        if density < 0.1 or density > 16.0:
+            return jsonify({"error": "density must be between 0.1 and 16.0"}), 400
+
+        # Validate output_size
+        output_size = int(config.get("output_size", 512))
+        if output_size not in [64, 128, 256, 512, 1024, 2048]:
+            return jsonify({"error": "output_size must be 64, 128, 256, 512, 1024, or 2048"}), 400
 
         # Support for batch generation
         # Check if 'actions' (list) is provided in config.
